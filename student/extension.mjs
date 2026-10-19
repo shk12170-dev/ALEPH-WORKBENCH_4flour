@@ -23,9 +23,11 @@ function modeText(mode) {
 
 function statusLine(kind, label, status, table, okValue) {
   const known = Object.hasOwn(table, status) ? status : 'unknown';
-  const line = node('span', `${label}: ${table[known]}`, `identity-status identity-status-${known}`);
+  // 번역 문구 옆에 서버가 보낸 원래 코드 값을 글자로 함께 보여 줍니다. 계약에 없는 값도 그대로 보입니다.
+  const raw = typeof status === 'string' && status ? status : 'unknown';
+  const text = `${label}: ${table[known]}(${raw})`;
+  const line = node('span', known === okValue ? text : `주의 · ${text}`, `identity-status identity-status-${known}`);
   line.dataset.status = known;
-  if (known !== okValue) line.textContent = `주의 · ${label}: ${table[known]}`;
   return line;
 }
 
