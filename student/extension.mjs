@@ -205,7 +205,7 @@ function eventDetail(event) {
   detail.append(states);
   // 연결되지 않은 조치가 입력된 경우에만 안내합니다. 비활성 버튼이며 어떤 요청도 보내지 않습니다.
   const actions = Array.isArray(event.supportedActions)
-    ? event.supportedActions.filter((a) => typeof a === 'string' && /^[A-Za-z0-9_.:-]{1,64}$/u.test(a))
+    ? event.supportedActions.filter((a) => typeof a === 'string' && ACTION_ID.test(a))
     : [];
   if (actions.length > 0) {
     const block = node('div', undefined, 'event-detail-block event-unsupported-actions');
@@ -333,6 +333,9 @@ function safeText(value, fallback = '확인 불가') {
   const text = String(value).replace(SECRET_LIKE, '[가림]').replace(/[\r\n\t]+/gu, ' ').trim().slice(0, 200);
   return text || fallback;
 }
+
+// 제공 화면(public/app.js)의 ID 검증 규칙과 같습니다: 영문·숫자로 시작하고 1~80자. 이 규칙을 통과한 조치 이름은 하나도 생략하지 않습니다.
+const ACTION_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,79}$/u;
 
 function safeCode(value) {
   return typeof value === 'string' && /^[A-Za-z0-9_.-]{1,64}$/u.test(value) ? value : '확인 불가';
