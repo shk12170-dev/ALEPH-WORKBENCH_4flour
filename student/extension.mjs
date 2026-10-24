@@ -664,6 +664,137 @@ function renderAiConnection(input) {
   return root;
 }
 
+// ---- 19단계: 보안 조치 요청 상태와 실제 결과 구분 ----
+// 조치 제안, 사람 확인, 서버 접수(ACK), 연동 시스템의 효과 관측은 서로 다른 단계입니다.
+// 이 함수는 버튼·요청·확인 번호를 만들지 않으며, 입력에 있는 값 가운데 아래 allowlist 만 글자로 표시합니다.
+// 확인 번호(confirmationId)와 같은 값은 읽지도 저장하지도 않습니다. 실제 조작은 제공 화면의 버튼을 씁니다.
+const ACTION_STATUS_TEXT = {
+  idle: ['아직 미실행(idle)', '조치 제안은 아직 실행되지 않았습니다.'],
+  loading: ['조치 준비 또는 결과 조회 중(loading)', '연동 시스템의 응답을 기다리는 중이며 결과가 아직 확인되지 않았습니다.'],
+  prepared: ['준비됨·미실행(prepared)', '조치는 준비만 되었고 실행되지 않았습니다. 아래 대상과 확인 기한을 사람이 확인한 뒤 제공 화면의 「대상과 조치를 확인했으며 집행합니다」 버튼을 직접 누르는 경우에만 전달됩니다.'],
+  executing: ['서버에 전달 중(executing)', '사람이 확인한 조치를 서버에 전달하는 중입니다. 결과가 아직 확인되지 않았습니다.'],
+  pending: ['서버 접수·처리 중(pending)', '서버가 요청을 받았다는 응답(ACK)입니다. ACK는 효과가 확인된 것이 아니며, 결과가 아직 확인되지 않았습니다. 제공 화면의 「연동 시스템 결과만 재조회」로 결과를 다시 조회하세요.'],
+  denied: ['연동 시스템 거절(denied)', '연동 시스템이 이 조치를 거절했습니다. 효과가 적용되지 않았습니다.'],
+  failed: ['실패(failed)', '연동 시스템에서 조치 처리에 실패했습니다.'],
+  unknown: ['결과 불명(unknown)', '효과가 적용되었다고도 적용되지 않았다고도 판단하지 마세요. 제공 화면의 「연동 시스템 결과만 재조회」로 결과만 다시 조회하세요.'],
+  expired: ['확인 기한 지남(expired)', '사람 확인 기한이 지나 전달되지 않았습니다. 필요하면 조치를 다시 준비하세요.'],
+  error: ['요청 처리 안 됨(error)', '요청이 처리되지 않았습니다. 조치 효과가 적용되었다고 볼 수 없습니다.'],
+};
+// 서버에 이미 전달된 조치의 효과는 화면을 취소해도 되돌아가지 않습니다.
+const ACTION_CANCEL_NOTE = '「조치 화면 취소」는 화면의 진행을 멈출 뿐, 이미 서버에 전달된 조치의 효과를 되돌리지 않습니다.';
+
+function actionIdText(value, fallback) {
+  return typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,79}$/u.test(value) ? value : fallback;
+}
+
+function renderAction(input) {
+  const value = input && typeof input === 'object' ? input : {};
+  const root = node('div', undefined, 'student-action-view');
+  root.dataset.testid = 'student-action-view';
+  root.append(node('h3', '보안 조치 요청 상태'));
+  root.append(node('p', '조치 제안, 사람 확인, 서버 접수(ACK), 연동 시스템의 효과 관측은 서로 다른 단계입니다. 화면의 문구가 아니라 아래 관측 값으로 판단하세요.', 'muted'));
+
+  const event = value.event && typeof value.event === 'object' ? value.event : null;
+  const eventId = event ? actionIdText(event.id, null) : null;
+  const actionId = actionIdText(value.actionId, null);
+  const target = value.target && typeof value.target === 'object' ? value.target : null;
+  const receipt = value.receipt && typeof value.receipt === 'object' ? value.receipt : null;
+  const observation = value.observation && typeof value.observation === 'object' ? value.observation : null;
+  const rawStatus = typeof value.status === 'string' ? value.status : '';
+  const known = Object.hasOwn(ACTION_STATUS_TEXT, rawStatus);
+
+  // 현재 사건·조치와 응답이 같은 대상인지 확인합니다. 어긋나면 응답을 표시하지 않고 결과 불명으로 둡니다.
+  const mismatched = receipt && ((typeof receipt.eventId === 'string' && eventId !== null && receipt.eventId !== eventId)
+    || (typeof receipt.actionId === 'string' && actionId !== null && receipt.actionId !== actionId));
+
+  // succeeded 는 연동 시스템이 효과를 관측했을 때(observation.effectApplied === true)만 효과 확인입니다.
+  const effectConfirmed = rawStatus === 'succeeded' && observation && observation.effectApplied === true
+    && typeof observation.observedAt === 'string' && observation.observedAt.length > 0;
+
+  let headline;
+  let guide;
+  let tone;
+  if (mismatched) {
+    headline = '결과 불명(unknown)';
+    guide = '받은 응답의 사건 또는 조치가 현재 화면의 사건·조치와 맞지 않아 표시하지 않습니다. 효과가 적용되었다고도 적용되지 않았다고도 판단하지 말고 결과만 다시 조회하세요.';
+    tone = 'state state-error';
+  } else if (rawStatus === 'succeeded') {
+    if (effectConfirmed) {
+      headline = '효과 확인(succeeded)';
+      guide = '연동 시스템이 조치 효과를 관측했습니다. 아래 관측 시각과 영수증 ID로 확인하세요.';
+      tone = 'state state-ok';
+    } else {
+      headline = '결과 불명(succeeded이지만 효과 관측 없음)';
+      guide = 'succeeded 상태에는 연동 시스템의 효과 관측(observation.effectApplied: true)이 함께 와야 합니다. 관측이 없으므로 효과 확인으로 표시하지 않으며, 성공으로도 효과 없음으로도 판단하지 마세요. 결과만 다시 조회하세요.';
+      tone = 'state state-error';
+    }
+  } else if (known) {
+    [headline, guide] = ACTION_STATUS_TEXT[rawStatus];
+    tone = ['denied', 'failed', 'error', 'unknown', 'expired'].includes(rawStatus) ? 'state state-error' : 'state state-empty';
+  } else {
+    headline = `결과 불명(unknown) — 알 수 없는 상태 값: ${safeCode(rawStatus)}`;
+    guide = '정의되지 않은 상태 값은 성공이나 효과 없음으로 보지 않습니다. 결과만 다시 조회하세요.';
+    tone = 'state state-error';
+  }
+  root.append(node('p', headline, tone));
+  root.append(node('p', guide));
+
+  if (rawStatus === 'idle' && (!event || (Array.isArray(event.supportedActions) && event.supportedActions.length === 0))) {
+    root.append(node('p', '지금 기록에는 연동 시스템이 지원하는 조치가 없어 「조치 준비」 버튼이 나오지 않는 것이 정상입니다.', 'muted'));
+  }
+
+  // 현재 사건·근거·조치·대상·요청·영수증 값은 받은 범위에서만 글자로 표시합니다.
+  if (!mismatched) {
+    const details = node('dl');
+    const add = (label, text) => { details.append(node('dt', label), node('dd', text)); };
+    if (eventId !== null) add('사건 ID(event.id)', eventId);
+    const evidenceIds = event && Array.isArray(event.evidence)
+      ? event.evidence.map((row) => actionIdText(row && row.id, null)).filter((id) => id !== null)
+      : [];
+    if (evidenceIds.length > 0) add('근거 ID(event.evidence)', evidenceIds.join(', '));
+    if (actionId !== null) add('조치(actionId)', actionId);
+    if (target) {
+      const targetId = actionIdText(target.id, null);
+      if (targetId !== null) add('실제 대상(target.id)', targetId);
+      if (Number.isSafeInteger(target.generation)) add('대상 세대(target.generation)', String(target.generation));
+    }
+    if (receipt) {
+      const requestId = actionIdText(receipt.requestId, null);
+      const receiptId = actionIdText(receipt.receiptId, null);
+      if (requestId !== null) add('요청 ID(receipt.requestId)', requestId);
+      if (receiptId !== null) add('영수증 ID(receipt.receiptId)', receiptId);
+      if (Number.isSafeInteger(receipt.version)) add('버전(receipt.version)', String(receipt.version));
+    }
+    if (rawStatus === 'prepared' && typeof value.confirmationExpiresAt === 'string') {
+      add('확인 기한(confirmationExpiresAt)', safeText(value.confirmationExpiresAt));
+    }
+    if (effectConfirmed) {
+      add('관측 시각(observation.observedAt)', safeText(observation.observedAt));
+      add('효과 관측(observation.effectApplied)', 'effectApplied: true');
+    }
+    if (details.children.length > 0) root.append(details);
+  }
+
+  if ((rawStatus === 'denied' || rawStatus === 'failed') && typeof value.message === 'string' && value.message) {
+    root.append(node('p', `메시지: ${safeText(value.message)}`, 'state state-error'));
+  }
+  if (rawStatus === 'error' && value.error && typeof value.error === 'object') {
+    root.append(node('p', `오류 코드: ${safeCode(value.error.code)} · 메시지: ${safeText(value.error.message, '메시지 없음')}`, 'state state-error'));
+  }
+  if (['executing', 'pending', 'unknown', 'loading'].includes(rawStatus) || mismatched) root.append(node('p', ACTION_CANCEL_NOTE, 'muted'));
+
+  // 성공적으로 그린 조치 표시에만 사건·요청 표식을 붙입니다. 접수(ACK)만 있는 경우와 불명·실패 화면에도 같은 표식이 필요한지는
+  // 공식 안내에 따라 현재 사건과 요청이 있는 정상 표시(prepared·executing·pending·효과 확인·denied·failed)에 한합니다.
+  const requestId = receipt ? actionIdText(receipt.requestId, null) : null;
+  const marked = !mismatched && eventId !== null && requestId !== null
+    && (effectConfirmed || ['prepared', 'executing', 'pending', 'denied', 'failed'].includes(rawStatus));
+  if (marked) {
+    root.dataset.studentActionEvent = eventId;
+    root.dataset.studentActionRequest = requestId;
+  }
+  return root;
+}
+
 export function createStudentView() {
   return {
     renderIdentity(input) { return renderIdentity(input); },
@@ -673,6 +804,6 @@ export function createStudentView() {
     renderVulnerabilities() { return '학생 구현 대기: 정확한 설치 버전·OSV 출처·조회 시각·부분 결과·조회 실패를 구분하세요.'; },
     renderAiConnection(input) { return renderAiConnection(input); },
     renderExplanation(input) { return renderExplanation(input); },
-    renderAction() { return '학생 구현 대기: 현재 사건·조치·실제 대상·사람 확인·ACK와 원천 효과·unknown을 구분하세요.'; },
+    renderAction(input) { return renderAction(input); },
   };
 }
