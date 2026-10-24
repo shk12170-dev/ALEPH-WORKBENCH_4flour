@@ -552,7 +552,7 @@ function renderExplanation(input) {
   const state = event.state && typeof event.state === 'object' ? event.state : {};
   const stateLabels = [['access', '접속'], ['session', '세션'], ['device', '기기']];
   const unknownStates = stateLabels.filter(([key]) => state[key] === 'unknown');
-  if (unknownStates.length === 0) statesBlock.append(node('p', '확인 불가 상태 없음'));
+  if (unknownStates.length === 0) statesBlock.append(node('p', '없음'));
   else {
     const stateList = node('ul');
     for (const [key, label] of unknownStates) stateList.append(node('li', `${label}: 확인 불가(unknown)`));
