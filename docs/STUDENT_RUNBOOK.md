@@ -32,7 +32,7 @@ Node.js가 `v24.19.0`이 아니면 실행 도구가 "참고: 지금 Node.js 는 
 
 ## 3. 폴더 구조
 
-작업 폴더는 이 문서를 쓴 PC 기준 `C:\tmp\4flour`입니다(저장소: `https://github.com/shk12170-dev/ALEPH-WORKBENCH_4flour`). 다른 PC에서는 저장소를 받은 폴더가 앱 폴더입니다.
+앱 폴더는 저장소를 받은 폴더(`package.json`이 있는 폴더)이며 이 문서에서는 `<앱 폴더>`로 씁니다. 저장소: `https://github.com/shk12170-dev/ALEPH-WORKBENCH_4flour`. 특정 PC의 절대 경로에 의존하지 않습니다.
 
 | 경로 | 역할 | 작성 |
 |---|---|---|
@@ -51,10 +51,10 @@ Node.js가 `v24.19.0`이 아니면 실행 도구가 "참고: 지금 Node.js 는 
 
 ## 4. 실행·종료·재실행
 
-**PowerShell을 여는 위치**: 앱 폴더(`package.json`이 있는 폴더). 예: `C:\tmp\4flour`.
+**PowerShell을 여는 위치**: 앱 폴더(`package.json`이 있는 폴더).
 
 ```powershell
-cd C:\tmp\4flour
+cd <앱 폴더>
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\start-alekov.ps1
 ```
 
