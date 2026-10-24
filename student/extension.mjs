@@ -488,6 +488,7 @@ function renderExplanation(input) {
     root.append(node('p', `오류 코드: ${errorCode}`));
     root.append(node('p', `오류 메시지: ${errorMessage}`, 'state state-error'));
     root.append(node('p', '근거가 부족하거나 설명 응답을 확인할 수 없어 설명을 표시하지 않습니다.'));
+    root.append(node('p', 'AI가 이미 실행했다고 답한 설명은 사용할 수 없습니다.', 'muted'));
     root.append(node('p', '기록은 그대로입니다. AI 설명이나 제안만으로 보안 조치가 실행되지는 않습니다.', 'muted'));
     return root;
   }
@@ -500,6 +501,11 @@ function renderExplanation(input) {
   if (explanation.status === 'loading') {
     root.append(node('h3', `${safeText(event.id, '사건 ID 확인 불가')} AI 설명`));
     root.append(node('p', 'AI 설명 요청 중입니다.', 'state state-loading'));
+    return root;
+  }
+  if (explanation.status === 'idle' || explanation.status === undefined) {
+    root.append(node('h3', `${safeText(event.id, '사건 ID 확인 불가')} AI 설명`));
+    root.append(node('p', '이 기록의 AI 설명을 아직 요청하지 않았습니다. 설명은 기록 상세의 요청 버튼으로 직접 요청합니다.', 'state state-empty'));
     return root;
   }
 
@@ -577,6 +583,9 @@ function renderExplanation(input) {
   }
   proposalBlock.append(node('p', 'AI 설명과 제안은 실행되지 않습니다. 실행에는 별도의 사람 확인이 필요합니다.', 'muted'));
   root.append(proposalBlock);
+  return root;
+}
+
 // ---- 17단계: 앱 내부 AI 연결 상태와 사건 설명 기본 표시 ----
 // 연결 점검(모델 목록 응답)과 실제 사건 설명 실행은 다른 일입니다. 점검 결과를 설명 성공처럼 쓰지 않습니다.
 // 다시 점검은 사용자가 제공 화면의 버튼을 직접 누르는 것뿐이며, 이 파일은 자동으로 요청하지 않습니다.
@@ -652,9 +661,6 @@ function renderAiConnection(input) {
   root.append(result);
   // 모델 목록 응답은 사건 설명이 된 것이 아닙니다.
   root.append(node('p', '사건 설명은 아직 실행하지 않았습니다. 사건 설명은 보안 기록에서 따로 요청하고 확인합니다.', 'state state-empty'));
-  return root;
-}
-
   return root;
 }
 
