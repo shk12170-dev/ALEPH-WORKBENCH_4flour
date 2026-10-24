@@ -34,4 +34,5 @@ npm start도 같은 서버를 켭니다. 기본 실행은 실제 회사 시스�
 - 지원 환경: Windows와 PowerShell 실행 도구, Node.js 22~24(수업 기준 24.19.0, 작성 PC에서 확인한 버전 v24.20.0), 외부 npm 의존성 없음. macOS·Linux·Node 22·23과 다른 브라우저는 확인하지 않았습니다.
 - 실행: 앱 폴더에서 `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\start-alekov.ps1` 실행 후 브라우저로 `http://127.0.0.1:5189`를 엽니다. 종료는 실행한 창에서 `Ctrl+C`입니다.
 - 구성: 브라우저 → 로컬 앱 서버(`src/server.mjs`) → 접근 제어·XDR 시스템(`src/engine/`, 기본 연결 안 됨) / AI 게이트웨이(`src/ai/`, 기본 설정 안 됨) / OSV 공개 조회(`src/vulnerabilities/`, 허용 목록이 비면 조회 안 함). 서버와 `public/`, `src/`, `tools/`는 제공 코드이며 학생이 바꾸지 않았습니다.
-- 확인하지 않은 것: 실제 브라우저 화면, 접근 제어·XDR 시스템 연결, AI 게이트웨이 연결, 실제 OSV 조회, 조치 집행. 자세한 구분은 `docs/STUDENT_RUNBOOK.md`의 7장에 있습니다.
+- 확인하지 않은 것: 접근 제어·XDR 시스템 연결, AI 게이트웨이 연결, 실제 OSV 조회, 조치 집행, 실제 클립보드 복사. 자세한 구분은 `docs/STUDENT_RUNBOOK.md`의 7장에 있습니다.
+- 릴리스 기록: `docs/STUDENT_RELEASE_RECORD.md`에 새 빈 폴더에서 같은 커밋을 받아 실행한 재현 기록, 13~21단계별 결과, 데이터 보존 계획, 버전과 미해결 사항을 적었습니다. 현재 버전은 실제 연결 없이 확인한 검증 중인 버전이며 운영 인증이나 v1.0이 아닙니다.
