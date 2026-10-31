@@ -584,12 +584,112 @@ function pcStatusView() {
   return section;
 }
 
+// ---- 완성하기 3일차: 네트워크 연결·방화벽 설정·Windows 기록 건수 (서버 GET /api/pc-connection, 읽기만) ----
+// 설정은 바꾸지 않습니다. 기록 건수는 침해·공격 탐지 결과가 아닙니다. SDP 연결 상태는 PC 조회 결과와 따로 보여 줍니다.
+let connState = { status: 'idle' };
+
+function connBlock(title, item, renderOk) {
+  const block = node('li', undefined, 'student-conn-item');
+  block.append(node('strong', title));
+  if (!item || typeof item !== 'object' || item.status !== 'ok') {
+    const reason = item && typeof item.reason === 'string' && item.reason ? safeText(item.reason) : '서버가 값을 주지 않았습니다.';
+    block.append(node('p', `확인 불가 · 이유: ${reason}`, 'state state-error'));
+    return block;
+  }
+  const text = renderOk(item);
+  block.append(node('p', text ?? '확인 불가 · 이유: 응답 값이 올바르지 않습니다.', text === null ? 'state state-error' : undefined));
+  return block;
+}
+
+function networkText(item) {
+  if (!Array.isArray(item.adapters)) return null;
+  if (item.adapters.length === 0) return '읽을 수 있는 네트워크 어댑터가 없습니다.';
+  return item.adapters.map((a) => `${safeText(a?.name, '이름 없음')} · ${safeText(a?.kind, '종류 확인 불가')} · ${a?.connected === true ? '연결됨' : a?.connected === false ? '연결 안 됨' : '연결 여부 확인 불가'}`).join(' / ');
+}
+
+function firewallText(item) {
+  if (!Array.isArray(item.profiles)) return null;
+  const list = item.profiles.map((p) => `${safeText(p?.name, '이름 없음')}: ${p?.enabled === true ? '켜짐' : p?.enabled === false ? '꺼짐' : '확인 불가'}`).join(' / ');
+  return `${list} · 읽기만 함(바꾸지 않음)`;
+}
+
+function eventText(log) {
+  return (item) => {
+    const e = pcNumber(item.error); const w = pcNumber(item.warning); const h = pcNumber(item.hours);
+    return e === null || w === null ? null : `${log} 기록: 오류 ${e}건 · 경고 ${w}건 (최근 ${h ?? '?'}시간) · 침해 판정 아님`;
+  };
+}
+
+function connectionView() {
+  const section = node('section', undefined, 'student-pc-connection');
+  section.dataset.testid = 'student-pc-connection';
+  section.append(node('h3', '연결과 기록(읽기만 함)'));
+  section.append(node('p', `값 출처: ${VALUE_MEASURED} · 이 PC의 네트워크 구성, 방화벽 설정, Windows 기록(System·Application)을 읽기만 합니다. 방화벽과 보안 설정은 바꾸지 않습니다.`, 'muted'));
+  section.append(node('p', '경고·오류 건수는 시스템이 남긴 기록의 개수일 뿐 침해나 공격을 탐지한 결과가 아닙니다.', 'muted'));
+  const result = node('div', undefined, 'student-conn-result');
+  const button = node('button', '연결·방화벽·기록 읽기');
+  button.type = 'button';
+  button.setAttribute('aria-label', '연결·방화벽·기록 읽기');
+
+  function draw() {
+    result.replaceChildren();
+    if (connState.status === 'idle') { result.append(node('p', '아직 읽지 않았습니다. 버튼을 누를 때만 한 번 읽습니다(자동으로 반복하지 않습니다).', 'state state-empty')); return; }
+    if (connState.status === 'loading') { result.append(node('p', '읽는 중… (몇 초 걸릴 수 있습니다)', 'state state-loading')); return; }
+    if (connState.status === 'error') {
+      result.append(node('p', `읽지 못했습니다: ${safeText(connState.message, '서버 응답 없음')}`, 'state state-error'));
+      result.append(node('p', '이전 값을 지금 값처럼 표시하지 않습니다. PC 조회 실패와 SDP 연결 상태는 서로 다른 내용입니다. 다시 시도는 버튼을 직접 누르세요.', 'muted'));
+      return;
+    }
+    const d = connState.data;
+    const measuredAt = typeof d?.measuredAt === 'string' ? formatCheckedAt(d.measuredAt) : '확인 불가';
+    result.append(node('p', `읽은 시각: ${measuredAt}`));
+    const pcList = node('ul');
+    pcList.append(
+      connBlock('네트워크 연결', d?.network, networkText),
+      connBlock('방화벽 설정', d?.firewall, firewallText),
+      connBlock('Windows 경고·오류', d?.events?.system, eventText('System')),
+      connBlock('Windows 경고·오류', d?.events?.application, eventText('Application')),
+    );
+    result.append(node('h4', 'PC 조회 결과(위 네 항목)'), pcList);
+    const sdp = d?.sdp && typeof d.sdp === 'object' ? d.sdp : null;
+    const label = sdp && ['SDP 미연결', '예제 자료(SDP 연결 아님)', '확인 불가'].includes(sdp.label) ? sdp.label : '확인 불가';
+    const reason = sdp && typeof sdp.reason === 'string' && sdp.reason ? safeText(sdp.reason) : '서버가 SDP 상태를 주지 않았습니다.';
+    result.append(node('h4', 'SDP 서버 연결 상태(PC 조회와 별개)'));
+    result.append(node('p', `SDP 서버: ${label} · ${reason}`, label === '확인 불가' ? 'state state-error' : undefined));
+    result.append(node('p', 'PC 조회가 성공했다는 것은 SDP 서버에 연결됐다는 뜻이 아닙니다.', 'muted'));
+  }
+
+  button.addEventListener('click', async () => {
+    if (connState.status === 'loading') return;
+    connState = { status: 'loading' };
+    button.disabled = true;
+    draw();
+    try {
+      if (typeof fetch !== 'function') throw new Error('이 환경에서는 조회할 수 없습니다.');
+      const response = await fetch('/api/pc-connection', { headers: { accept: 'application/json' } });
+      const body = await response.json();
+      if (!response.ok || !body || body.ok !== true || !body.data || typeof body.data !== 'object') {
+        throw new Error(body?.error?.message ?? `서버가 ${response.status}로 응답했습니다.`);
+      }
+      connState = { status: 'ok', data: body.data };
+    } catch (error) {
+      connState = { status: 'error', message: error?.message };
+    }
+    button.disabled = false;
+    draw();
+  });
+  draw();
+  section.append(button, result);
+  return section;
+}
+
 function renderStatus(input) {
   const { devices, sessions, notifications, diagnostics, mode } = input || {};
   const root = node('div', undefined, 'student-status-view');
   root.dataset.testid = 'student-status-view';
   root.append(dashboardView({ devices, sessions, notifications, diagnostics, mode }));
   root.append(pcStatusView());
+  root.append(connectionView());
   root.append(node('h3', '연결 상태·알림'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
 

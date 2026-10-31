@@ -17,6 +17,7 @@ import {createVaultOnAiService} from './ai/vault-service.mjs';
 import {createConnectionManager} from './connection/manager.mjs';
 import {createProjectScanner} from './vulnerabilities/project-scan.mjs';
 import {createPcStatusService} from './pc-status/service.mjs';
+import {createPcConnectionService} from './pc-status/connection.mjs';
 import {buildLocalLearnerSupportGuide,isLearnerSupportProblemKind,readLocalLearnerSupportObservation} from './learner-support/service.mjs';
 import {nativeOwn,nativePublicError} from './connection/native-login.mjs';
 import {createNativeHostContext,captureNativeHostConfiguration,readNativeHostConfiguration,openNativeHostOperation,readNativeHostOperation,assertNativeHostOperation,createNativeOperationVault,closeNativeHostOperation} from './connection/native-context.mjs';
@@ -210,6 +211,7 @@ export function createOnServer(serverOptions={}) {
     scanner=createProjectScanner(),assetsRoot=root,clock=()=>new Date(),readTimeoutMs=10000,requestTimeoutMs=15000}=serverOptions;
   if(nativeConfiguration&&(ai!==undefined||resolveAiIdentity!==undefined||readLearnerSupportIdentity!==undefined||appCredentialVault!==undefined||vaultAiConfiguration!==undefined||aiConnectionConfiguration!==undefined||typeof aiEnv.ON_AI_APP_KEY==='string'&&aiEnv.ON_AI_APP_KEY))throw Error('INVALID_SERVER_AI_CONFIGURATION');
   const pcStatus=createPcStatusService({clock});
+  const pcConnection=createPcConnectionService({clock});
   const nativeHost=nativeConfiguration?createNativeHostContext(nativeConfiguration):null;
   // c2(#978): host 가 sdpActionStartup({databasePath, policy})을 주면, 이 서버가 만든 SDP host engine 과 genuine native host 를
   // createSdpActionConfiguration 에 그대로 넘긴다(자기 철회 뒤 본인 영수증 포함). identityVersion 은 같은 native host operation 에서 읽는다.
@@ -692,6 +694,10 @@ export function createOnServer(serverOptions={}) {
       if(req.method==='GET'&&url.pathname==='/api/pc-status'){
         // 2일차(학생 추가): 이 PC의 CPU·메모리·디스크를 일반 권한으로 읽는다. 읽지 못한 항목은 unavailable 로 돌려준다.
         send(200,{ok:true,data:await pcStatus.read()});return;
+      }
+      if(req.method==='GET'&&url.pathname==='/api/pc-connection'){
+        // 3일차(학생 추가): 네트워크·방화벽·Windows 기록 건수를 읽기만 한다. 설정은 바꾸지 않는다.
+        send(200,{ok:true,data:await pcConnection.read(mode)});return;
       }
       if(req.method==='GET'&&url.pathname==='/api/vulnerabilities'){
         const data=await bounded(signal=>scanner.scan({signal}));send(200,{ok:true,data});
