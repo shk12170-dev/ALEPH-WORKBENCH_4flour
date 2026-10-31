@@ -243,7 +243,6 @@ function renderEvents(input) {
   root.append(node('h3', '내 접속 기록·XDR 경보'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
   root.append(node('p', '본인의 최근 기록(최대 40건)입니다. 모든 직원의 전체 이력이나 실시간 전체 위협 탐지가 아닙니다.', 'muted'));
-  root.append(node('p', `값 출처: ${valueTag(mode)}`, 'muted'));
 
   if (status === 'loading') {
     root.append(node('p', '기록을 불러오는 중…', 'state state-loading'));
@@ -262,6 +261,8 @@ function renderEvents(input) {
     root.append(node('p', '기록 상태를 확인할 수 없습니다.', 'state state-error'));
     return root;
   }
+  // 값 출처는 기록 조회가 성공해 결과를 보여 줄 때만 붙입니다. 불러오는 중·조회 실패·확인 불가에는 보여 주는 값이 없습니다.
+  root.append(node('p', `값 출처: ${valueTag(mode)}`, 'muted'));
   if (data.length === 0) {
     root.append(node('p', '표시할 기록이 없습니다.', 'state state-empty'));
     return root;
