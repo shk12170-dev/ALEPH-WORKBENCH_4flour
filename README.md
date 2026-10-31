@@ -6,6 +6,8 @@
 
 ## 켜기
 
+처음 보는 사람이 따라 하는 한 장 안내는 docs/QUICKSTART_ONE_PAGE.md입니다.
+
 검수 환경은 Node.js 24.19.0이며 외부 npm 의존성이 없습니다. 이 폴더의 PowerShell에서 아래를 실행하고 PC 브라우저로 http://127.0.0.1:5189 를 엽니다. 자세한 켜기·끄기·다시 켜기는 docs/STUDENT_LAUNCH_GUIDE.md에 있습니다.
 
     powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\start-alekov.ps1
