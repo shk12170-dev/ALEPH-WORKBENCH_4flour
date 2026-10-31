@@ -470,11 +470,126 @@ function dashboardView(input) {
   return section;
 }
 
+// ---- 완성하기 2일차: 내 PC의 CPU·메모리·디스크 (서버 GET /api/pc-status, 사용자가 누를 때만 조회) ----
+// 제공 기능이 아니라 학생이 추가한 부분입니다. 읽지 못한 값은 0이나 예시 값이 아니라 확인 불가와 이유로 보여 줍니다.
+const PC_TREND_MAX = 10;
+const pcTrend = [];
+let pcState = { status: 'idle' };
+
+function pcNumber(value) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function pcItem(label, item, format) {
+  if (!item || typeof item !== 'object' || item.status !== 'ok') {
+    const reason = item && typeof item.reason === 'string' && item.reason ? safeText(item.reason) : '서버가 값을 주지 않았습니다.';
+    return { text: `${label}: 확인 불가 · 이유: ${reason}`, value: null };
+  }
+  const result = format(item);
+  return result ?? { text: `${label}: 확인 불가 · 이유: 응답 값이 올바르지 않습니다.`, value: null };
+}
+
+function pcRows(data) {
+  const cpu = pcItem('CPU 사용률', data?.cpu, (i) => {
+    const v = pcNumber(i.value);
+    return v === null ? null : { text: `CPU 사용률: ${v}% (약 ${pcNumber(i.windowMs) ?? '?'}ms 동안 평균)`, value: v };
+  });
+  const memory = pcItem('메모리 사용량', data?.memory, (i) => {
+    const used = pcNumber(i.usedGiB); const total = pcNumber(i.totalGiB); const pct = pcNumber(i.percent);
+    return used === null || total === null || pct === null ? null : { text: `메모리 사용량: ${used} GiB / ${total} GiB (${pct}%)`, value: pct };
+  });
+  const disk = pcItem('디스크 남은 공간', data?.disk, (i) => {
+    const free = pcNumber(i.freeGiB); const total = pcNumber(i.totalGiB);
+    return free === null || total === null ? null : { text: `디스크 남은 공간: ${free} GiB / ${total} GiB (앱 폴더가 있는 드라이브)`, value: free };
+  });
+  return { cpu, memory, disk };
+}
+
+function pcDelta(now, before, unit) {
+  if (now === null || before === null) return '이전 값과 비교 불가';
+  const diff = Math.round((now - before) * 10) / 10;
+  return diff === 0 ? '이전과 같음' : `이전보다 ${diff > 0 ? '+' : ''}${diff}${unit}`;
+}
+
+function pcStatusView() {
+  const section = node('section', undefined, 'student-pc-status');
+  section.dataset.testid = 'student-pc-status';
+  section.append(node('h3', '내 PC 상태(CPU·메모리·디스크)'));
+  section.append(node('p', `값 출처: ${VALUE_MEASURED} · 이 앱을 실행 중인 PC의 운영체제에서 일반 권한으로 읽은 값입니다. 예제 모드에서도 예시 값으로 바꾸지 않습니다.`, 'muted'));
+  const result = node('div', undefined, 'student-pc-result');
+  const button = node('button', '내 PC 상태 재기');
+  button.type = 'button';
+  button.setAttribute('aria-label', '내 PC 상태 재기');
+  const feedback = node('p', undefined, 'muted');
+  feedback.setAttribute('role', 'status');
+
+  function draw() {
+    result.replaceChildren();
+    if (pcState.status === 'idle') {
+      result.append(node('p', '아직 재지 않았습니다. 버튼을 누를 때만 한 번 읽습니다(자동으로 반복하지 않습니다).', 'state state-empty'));
+      return;
+    }
+    if (pcState.status === 'loading') { result.append(node('p', '재는 중… (CPU는 약 0.5초 걸립니다)', 'state state-loading')); return; }
+    if (pcState.status === 'error') {
+      result.append(node('p', `재지 못했습니다: ${safeText(pcState.message, '서버 응답 없음')}`, 'state state-error'));
+      result.append(node('p', '이전에 잰 값이 있어도 지금 값으로 표시하지 않습니다. 다시 시도는 버튼을 직접 누르세요.', 'muted'));
+    } else {
+      const rows = pcRows(pcState.data);
+      const prev = pcTrend[1] ? pcRows(pcTrend[1].data) : null;
+      const measuredAt = typeof pcState.data?.measuredAt === 'string' ? formatCheckedAt(pcState.data.measuredAt) : '확인 불가';
+      result.append(node('p', `잰 시각: ${measuredAt}`));
+      const list = node('ul');
+      list.append(
+        node('li', `${rows.cpu.text} · ${pcDelta(rows.cpu.value, prev?.cpu.value ?? null, '%p')}`),
+        node('li', `${rows.memory.text} · ${pcDelta(rows.memory.value, prev?.memory.value ?? null, '%p')}`),
+        node('li', `${rows.disk.text} · ${pcDelta(rows.disk.value, prev?.disk.value ?? null, ' GiB')}`),
+      );
+      result.append(list);
+    }
+    if (pcTrend.length) {
+      result.append(node('h4', `재 본 기록(이번 접속에서 최근 ${PC_TREND_MAX}번까지)`));
+      const history = node('ul');
+      for (const row of pcTrend) {
+        const r = pcRows(row.data);
+        history.append(node('li', `${formatCheckedAt(row.data?.measuredAt)} · CPU ${r.cpu.value === null ? '확인 불가' : `${r.cpu.value}%`} · 메모리 ${r.memory.value === null ? '확인 불가' : `${r.memory.value}%`} · 디스크 남음 ${r.disk.value === null ? '확인 불가' : `${r.disk.value} GiB`}`));
+      }
+      result.append(history);
+    }
+  }
+
+  button.addEventListener('click', async () => {
+    if (pcState.status === 'loading') return;
+    pcState = { status: 'loading' };
+    button.disabled = true;
+    draw();
+    try {
+      if (typeof fetch !== 'function') throw new Error('이 환경에서는 조회할 수 없습니다.');
+      const response = await fetch('/api/pc-status', { headers: { accept: 'application/json' } });
+      const body = await response.json();
+      if (!response.ok || !body || body.ok !== true || !body.data || typeof body.data !== 'object') {
+        throw new Error(body?.error?.message ?? `서버가 ${response.status}로 응답했습니다.`);
+      }
+      pcState = { status: 'ok', data: body.data };
+      pcTrend.unshift({ data: body.data });
+      if (pcTrend.length > PC_TREND_MAX) pcTrend.length = PC_TREND_MAX;
+      feedback.textContent = '';
+    } catch (error) {
+      pcState = { status: 'error', message: error?.message };
+    }
+    button.disabled = false;
+    draw();
+  });
+  draw();
+  section.append(button, feedback, result);
+  return section;
+}
+
 function renderStatus(input) {
   const { devices, sessions, notifications, diagnostics, mode } = input || {};
   const root = node('div', undefined, 'student-status-view');
   root.dataset.testid = 'student-status-view';
   root.append(dashboardView({ devices, sessions, notifications, diagnostics, mode }));
+  root.append(pcStatusView());
   root.append(node('h3', '연결 상태·알림'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
 
