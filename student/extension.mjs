@@ -243,6 +243,7 @@ function renderEvents(input) {
   root.append(node('h3', '내 접속 기록·XDR 경보'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
   root.append(node('p', '본인의 최근 기록(최대 40건)입니다. 모든 직원의 전체 이력이나 실시간 전체 위협 탐지가 아닙니다.', 'muted'));
+  root.append(node('p', `값 출처: ${valueTag(mode)}`, 'muted'));
 
   if (status === 'loading') {
     root.append(node('p', '기록을 불러오는 중…', 'state state-loading'));
@@ -290,7 +291,7 @@ function renderEvents(input) {
     const shown = events.filter((e) => (kindFilter.select.value === 'all' || String(e.kind) === kindFilter.select.value)
       && (appFilter.select.value === 'all' || appOf(e) === appFilter.select.value)
       && (accessFilter.select.value === 'all' || String(e.state?.access) === accessFilter.select.value));
-    count.textContent = `${shown.length}건 표시 / 전체 ${events.length}건`;
+    count.textContent = `${shown.length}건 표시 / 전체 ${events.length}건 · 가장 최근 ${formatCheckedAt(events[0]?.at)}`;
     list.replaceChildren();
     if (shown.length === 0) list.append(node('li', '선택한 조건에 맞는 기록이 없습니다.', 'state state-empty'));
     for (const event of shown) {
@@ -387,10 +388,93 @@ function diagnosticsFields(data) {
   ];
 }
 
+// ---- 완성하기: 관제 대시보드(상태 카드 4개 + 추이) ----
+// 값 출처 표시: 예제 모드는 설명용 값, 그 밖에는 이 PC에서 방금 조회한 값입니다. 서버에 저장된 이력이 아닙니다.
+const VALUE_MEASURED = '[내 PC에서 잰 값]';
+const VALUE_EXAMPLE = '[예시 화면 · 설명용 값]';
+const TREND_MAX = 10;
+const trend = [];
+let lastSeen = { devices: null, sessions: null };
+
+function valueTag(mode) {
+  return mode === 'demo' ? VALUE_EXAMPLE : VALUE_MEASURED;
+}
+
+function resourceBrief(resource, unit) {
+  const res = resource && typeof resource === 'object' ? resource : {};
+  if (res.status === 'loading') return '불러오는 중';
+  if (res.status === 'error') return '조회 실패';
+  if (res.status === 'ok' && Array.isArray(res.data)) return `${res.data.length}${unit}`;
+  return '확인 불가';
+}
+
+function settled(resource) {
+  return resource && typeof resource === 'object' && (resource.status === 'ok' || resource.status === 'error');
+}
+
+// 새로 불러온 결과가 나왔을 때만 한 줄 기록합니다(같은 결과를 다시 그릴 때는 늘리지 않습니다).
+function recordTrend(devices, sessions) {
+  if (!settled(devices) || !settled(sessions)) return;
+  if (devices === lastSeen.devices && sessions === lastSeen.sessions) return;
+  lastSeen = { devices, sessions };
+  const row = { at: new Date(), devices: resourceBrief(devices, '대'), sessions: resourceBrief(sessions, '개') };
+  // 같은 불러오기에서 화면이 연달아 다시 그려져도 같은 결과가 같은 초에 두 줄 생기지 않게 합니다.
+  const prev = trend[0];
+  if (prev && prev.devices === row.devices && prev.sessions === row.sessions && row.at - prev.at < 2000) return;
+  trend.unshift(row);
+  if (trend.length > TREND_MAX) trend.length = TREND_MAX;
+}
+
+function clockText(date) {
+  const two = (n) => String(n).padStart(2, '0');
+  return `${two(date.getHours())}:${two(date.getMinutes())}:${two(date.getSeconds())}`;
+}
+
+function statusCard(title, value, note, tone) {
+  const card = node('div', undefined, `dashboard-card dashboard-card-${tone}`);
+  card.append(node('strong', title), node('p', value, 'dashboard-card-value'));
+  if (note) card.append(node('p', note, 'muted'));
+  return card;
+}
+
+function dashboardView(input) {
+  const { devices, sessions, notifications, diagnostics, mode } = input;
+  recordTrend(devices, sessions);
+  const section = node('section', undefined, 'student-dashboard');
+  section.dataset.testid = 'student-dashboard';
+  section.append(node('h3', '관제 대시보드'));
+  section.append(node('p', `값 출처: ${valueTag(mode)} · ${modeText(mode)}`, 'muted'));
+
+  const diag = diagnostics && diagnostics.status === 'ok' && diagnostics.data && typeof diagnostics.data === 'object' ? diagnostics.data : null;
+  const engineCode = diag ? safeText(diag.engine?.code, '코드 없음') : '도움정보 미조회';
+  const notifyCount = Array.isArray(notifications) ? notifications.length : null;
+  const failed = [devices, sessions].some((r) => r && r.status === 'error');
+  const cards = node('div', undefined, 'dashboard-cards');
+  cards.append(
+    statusCard('① 연결', labelOf(MODE_LABELS, typeof mode === 'string' ? mode : 'unknown'), `엔진 코드: ${engineCode}`, mode === 'connected' || mode === 'demo' ? 'ok' : 'warn'),
+    statusCard('② 기기·세션', `기기 ${resourceBrief(devices, '대')} / 세션 ${resourceBrief(sessions, '개')}`, failed ? '일부 조회 실패' : undefined, failed ? 'warn' : 'ok'),
+    statusCard('③ 알림', notifyCount === null ? '확인 불가' : `${notifyCount}건`, notifyCount ? '아래 알림 목록을 확인하세요' : undefined, notifyCount ? 'warn' : 'ok'),
+    statusCard('④ 마지막 확인', trend.length ? clockText(trend[0].at) : '아직 조회 결과 없음', '이 화면에서 직접 불러온 시각', 'ok'),
+  );
+  section.append(cards);
+
+  section.append(node('h4', `추이(이번 접속에서 불러온 최근 ${TREND_MAX}번까지)`));
+  if (trend.length === 0) {
+    section.append(node('p', '아직 불러온 결과가 없습니다.', 'state state-empty'));
+  } else {
+    const list = node('ul', undefined, 'dashboard-trend');
+    for (const row of trend) list.append(node('li', `${clockText(row.at)} · 기기 ${row.devices} · 세션 ${row.sessions}`));
+    section.append(list);
+  }
+  section.append(node('p', '추이는 이 브라우저 화면이 열려 있는 동안만 남습니다. 서버에 저장된 이력이 아닙니다.', 'muted'));
+  return section;
+}
+
 function renderStatus(input) {
   const { devices, sessions, notifications, diagnostics, mode } = input || {};
   const root = node('div', undefined, 'student-status-view');
   root.dataset.testid = 'student-status-view';
+  root.append(dashboardView({ devices, sessions, notifications, diagnostics, mode }));
   root.append(node('h3', '연결 상태·알림'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
 
