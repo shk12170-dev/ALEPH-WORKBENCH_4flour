@@ -388,6 +388,72 @@ function diagnosticsFields(data) {
   ];
 }
 
+// ---- 완성하기 4일차: 화면 다듬기 도우미 ----
+// 제공 화면의 CSS(public/style.css)와 화면 보안 규칙(style-src 'self')은 그대로 두고, 학생이 더한 요소에만 style 속성값을 지정합니다.
+// style 객체가 없는 환경(모의 DOM)에서는 아무 일도 하지 않습니다.
+function look(element, props) {
+  if (element && element.style) Object.assign(element.style, props);
+  return element;
+}
+
+function withFocusRing(element) {
+  element.addEventListener('focus', () => look(element, { outline: '3px solid #7c3aed', outlineOffset: '2px' }));
+  element.addEventListener('blur', () => look(element, { outline: '' }));
+  return element;
+}
+
+function actionButton(label) {
+  const button = node('button', label);
+  button.type = 'button';
+  button.setAttribute('aria-label', label);
+  look(button, { minHeight: '2.5rem', padding: '0.5rem 1rem', fontSize: '1rem', cursor: 'pointer' });
+  return withFocusRing(button);
+}
+
+// 실패 이유에 맞는 다음 행동을 알려 줍니다. 읽기 전용 앱이라 설정을 바꾸라고 하지 않습니다.
+function nextStep(reason) {
+  const text = typeof reason === 'string' ? reason : '';
+  if (/서버에 연결하지 못했습니다/.test(text)) return '앱 폴더의 PowerShell에서 npm start 로 서버가 켜져 있는지 확인한 뒤 「다시 조회」를 누르세요.';
+  if (/권한/.test(text)) return '관리자 권한이 필요한 항목입니다. 앱은 설정을 바꾸지 않습니다. 필요하면 PC 관리자에게 읽기 권한을 문의한 뒤 「다시 조회」를 누르세요.';
+  if (/시간 초과/.test(text)) return '잠시 뒤 「다시 조회」를 눌러 주세요. 계속 오래 걸리면 다른 프로그램을 줄이고 다시 시도하세요.';
+  if (/PowerShell/.test(text)) return 'PowerShell 실행이 막혀 있는지 확인하세요. 막혀 있어도 앱은 설정을 바꾸지 않습니다.';
+  if (/Windows가 아니/.test(text)) return 'Windows PC에서만 읽을 수 있는 항목입니다.';
+  return '「다시 조회」를 눌러 다시 시도하세요. 계속 실패하면 이 화면의 문구를 그대로 복사해 AI에게 보여 주세요.';
+}
+
+function serverReason(error) {
+  const message = error && typeof error.message === 'string' ? error.message : '';
+  if (error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(message)) return '서버에 연결하지 못했습니다.';
+  return safeText(message, '서버 응답 없음');
+}
+
+// 오류 화면: 실패한 항목, 이유, 다음에 할 일을 적습니다. 예시 값이나 이전 값으로 대신하지 않습니다.
+function failureScreen(title, failures) {
+  const box = node('div', undefined, 'state state-error student-failure');
+  box.setAttribute('role', 'alert');
+  box.append(look(node('strong', title), { fontSize: '1.05rem' }));
+  const list = node('ul');
+  for (const failure of failures) {
+    list.append(node('li', `실패한 항목: ${failure.name} · 이유: ${failure.reason} · 다음에 할 일: ${nextStep(failure.reason)}`));
+  }
+  box.append(list);
+  box.append(node('p', '예시 값이나 이전에 잰 값으로 대신 보여 주지 않았습니다.', 'muted'));
+  return look(box, { padding: '0.75rem 1rem', borderRadius: '8px', fontSize: '1rem', lineHeight: '1.6' });
+}
+
+// 조회가 끝나면 결과 칸으로 포커스를 옮겨 키보드·화면 읽기 사용자가 결과를 바로 알 수 있게 합니다.
+function prepareResultRegion(region) {
+  region.tabIndex = -1;
+  region.setAttribute('aria-live', 'polite');
+  region.setAttribute('aria-busy', 'false');
+  return look(withFocusRing(region), { lineHeight: '1.6', fontSize: '1rem' });
+}
+
+function focusResult(region) {
+  region.setAttribute('aria-busy', 'false');
+  if (typeof region.focus === 'function') region.focus();
+}
+
 // ---- 완성하기: 관제 대시보드(상태 카드 4개 + 추이) ----
 // 값 출처 표시: 예제 모드는 설명용 값, 그 밖에는 이 PC에서 방금 조회한 값입니다. 서버에 저장된 이력이 아닙니다.
 const VALUE_MEASURED = '[내 PC에서 잰 값]';
@@ -432,9 +498,9 @@ function clockText(date) {
 
 function statusCard(title, value, note, tone) {
   const card = node('div', undefined, `dashboard-card dashboard-card-${tone}`);
-  card.append(node('strong', title), node('p', value, 'dashboard-card-value'));
+  card.append(node('strong', title), look(node('p', value, 'dashboard-card-value'), { fontSize: '1.15rem', fontWeight: '700', margin: '0.25rem 0' }));
   if (note) card.append(node('p', note, 'muted'));
-  return card;
+  return look(card, { border: '1px solid rgba(124, 58, 237, 0.35)', borderLeft: `6px solid ${tone === 'ok' ? '#15803d' : '#b45309'}`, borderRadius: '8px', padding: '0.75rem 1rem' });
 }
 
 function dashboardView(input) {
@@ -449,7 +515,7 @@ function dashboardView(input) {
   const engineCode = diag ? safeText(diag.engine?.code, '코드 없음') : '도움정보 미조회';
   const notifyCount = Array.isArray(notifications) ? notifications.length : null;
   const failed = [devices, sessions].some((r) => r && r.status === 'error');
-  const cards = node('div', undefined, 'dashboard-cards');
+  const cards = look(node('div', undefined, 'dashboard-cards'), { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(11rem, 1fr))', gap: '0.75rem' });
   cards.append(
     statusCard('① 연결', labelOf(MODE_LABELS, typeof mode === 'string' ? mode : 'unknown'), `엔진 코드: ${engineCode}`, mode === 'connected' || mode === 'demo' ? 'ok' : 'warn'),
     statusCard('② 기기·세션', `기기 ${resourceBrief(devices, '대')} / 세션 ${resourceBrief(sessions, '개')}`, failed ? '일부 조회 실패' : undefined, failed ? 'warn' : 'ok'),
@@ -483,10 +549,10 @@ function pcNumber(value) {
 function pcItem(label, item, format) {
   if (!item || typeof item !== 'object' || item.status !== 'ok') {
     const reason = item && typeof item.reason === 'string' && item.reason ? safeText(item.reason) : '서버가 값을 주지 않았습니다.';
-    return { text: `${label}: 확인 불가 · 이유: ${reason}`, value: null };
+    return { text: `${label}: 확인 불가 · 이유: ${reason}`, value: null, failure: { name: label, reason } };
   }
   const result = format(item);
-  return result ?? { text: `${label}: 확인 불가 · 이유: 응답 값이 올바르지 않습니다.`, value: null };
+  return result ?? { text: `${label}: 확인 불가 · 이유: 응답 값이 올바르지 않습니다.`, value: null, failure: { name: label, reason: '응답 값이 올바르지 않습니다.' } };
 }
 
 function pcRows(data) {
@@ -516,10 +582,8 @@ function pcStatusView() {
   section.dataset.testid = 'student-pc-status';
   section.append(node('h3', '내 PC 상태(CPU·메모리·디스크)'));
   section.append(node('p', `값 출처: ${VALUE_MEASURED} · 이 앱을 실행 중인 PC의 운영체제에서 일반 권한으로 읽은 값입니다. 예제 모드에서도 예시 값으로 바꾸지 않습니다.`, 'muted'));
-  const result = node('div', undefined, 'student-pc-result');
-  const button = node('button', '내 PC 상태 재기');
-  button.type = 'button';
-  button.setAttribute('aria-label', '내 PC 상태 재기');
+  const result = prepareResultRegion(node('div', undefined, 'student-pc-result'));
+  const button = actionButton('PC 상태 다시 조회');
   const feedback = node('p', undefined, 'muted');
   feedback.setAttribute('role', 'status');
 
@@ -529,10 +593,9 @@ function pcStatusView() {
       result.append(node('p', '아직 재지 않았습니다. 버튼을 누를 때만 한 번 읽습니다(자동으로 반복하지 않습니다).', 'state state-empty'));
       return;
     }
-    if (pcState.status === 'loading') { result.append(node('p', '재는 중… (CPU는 약 0.5초 걸립니다)', 'state state-loading')); return; }
+    if (pcState.status === 'loading') { result.append(node('p', '새로 읽는 중… (CPU는 약 0.5초 걸립니다)', 'state state-loading')); return; }
     if (pcState.status === 'error') {
-      result.append(node('p', `재지 못했습니다: ${safeText(pcState.message, '서버 응답 없음')}`, 'state state-error'));
-      result.append(node('p', '이전에 잰 값이 있어도 지금 값으로 표시하지 않습니다. 다시 시도는 버튼을 직접 누르세요.', 'muted'));
+      result.append(failureScreen('내 PC 상태를 읽지 못했습니다', [{ name: 'PC 상태(CPU·메모리·디스크) 전체', reason: pcState.message }]));
     } else {
       const rows = pcRows(pcState.data);
       const prev = pcTrend[1] ? pcRows(pcTrend[1].data) : null;
@@ -545,6 +608,8 @@ function pcStatusView() {
         node('li', `${rows.disk.text} · ${pcDelta(rows.disk.value, prev?.disk.value ?? null, ' GiB')}`),
       );
       result.append(list);
+      const failures = [rows.cpu, rows.memory, rows.disk].filter((row) => row.failure).map((row) => row.failure);
+      if (failures.length) result.append(failureScreen('일부 항목을 읽지 못했습니다(읽은 항목은 위에 그대로 표시)', failures));
     }
     if (pcTrend.length) {
       result.append(node('h4', `재 본 기록(이번 접속에서 최근 ${PC_TREND_MAX}번까지)`));
@@ -561,6 +626,7 @@ function pcStatusView() {
     if (pcState.status === 'loading') return;
     pcState = { status: 'loading' };
     button.disabled = true;
+    result.setAttribute('aria-busy', 'true');
     draw();
     try {
       if (typeof fetch !== 'function') throw new Error('이 환경에서는 조회할 수 없습니다.');
@@ -574,29 +640,32 @@ function pcStatusView() {
       if (pcTrend.length > PC_TREND_MAX) pcTrend.length = PC_TREND_MAX;
       feedback.textContent = '';
     } catch (error) {
-      pcState = { status: 'error', message: error?.message };
+      pcState = { status: 'error', message: serverReason(error) };
     }
     button.disabled = false;
     draw();
+    focusResult(result);
   });
   draw();
   section.append(button, feedback, result);
-  return section;
+  return look(section, { marginTop: '1rem', padding: '0.75rem 0' });
 }
 
 // ---- 완성하기 3일차: 네트워크 연결·방화벽 설정·Windows 기록 건수 (서버 GET /api/pc-connection, 읽기만) ----
 // 설정은 바꾸지 않습니다. 기록 건수는 침해·공격 탐지 결과가 아닙니다. SDP 연결 상태는 PC 조회 결과와 따로 보여 줍니다.
 let connState = { status: 'idle' };
 
-function connBlock(title, item, renderOk) {
+function connBlock(title, item, renderOk, failures) {
   const block = node('li', undefined, 'student-conn-item');
   block.append(node('strong', title));
   if (!item || typeof item !== 'object' || item.status !== 'ok') {
     const reason = item && typeof item.reason === 'string' && item.reason ? safeText(item.reason) : '서버가 값을 주지 않았습니다.';
     block.append(node('p', `확인 불가 · 이유: ${reason}`, 'state state-error'));
+    failures.push({ name: title, reason });
     return block;
   }
   const text = renderOk(item);
+  if (text === null) failures.push({ name: title, reason: '응답 값이 올바르지 않습니다.' });
   block.append(node('p', text ?? '확인 불가 · 이유: 응답 값이 올바르지 않습니다.', text === null ? 'state state-error' : undefined));
   return block;
 }
@@ -626,31 +695,31 @@ function connectionView() {
   section.append(node('h3', '연결과 기록(읽기만 함)'));
   section.append(node('p', `값 출처: ${VALUE_MEASURED} · 이 PC의 네트워크 구성, 방화벽 설정, Windows 기록(System·Application)을 읽기만 합니다. 방화벽과 보안 설정은 바꾸지 않습니다.`, 'muted'));
   section.append(node('p', '경고·오류 건수는 시스템이 남긴 기록의 개수일 뿐 침해나 공격을 탐지한 결과가 아닙니다.', 'muted'));
-  const result = node('div', undefined, 'student-conn-result');
-  const button = node('button', '연결·방화벽·기록 읽기');
-  button.type = 'button';
-  button.setAttribute('aria-label', '연결·방화벽·기록 읽기');
+  const result = prepareResultRegion(node('div', undefined, 'student-conn-result'));
+  const button = actionButton('연결·기록 다시 조회');
 
   function draw() {
     result.replaceChildren();
     if (connState.status === 'idle') { result.append(node('p', '아직 읽지 않았습니다. 버튼을 누를 때만 한 번 읽습니다(자동으로 반복하지 않습니다).', 'state state-empty')); return; }
-    if (connState.status === 'loading') { result.append(node('p', '읽는 중… (몇 초 걸릴 수 있습니다)', 'state state-loading')); return; }
+    if (connState.status === 'loading') { result.append(node('p', '새로 읽는 중… (10초 안팎 걸릴 수 있습니다)', 'state state-loading')); return; }
     if (connState.status === 'error') {
-      result.append(node('p', `읽지 못했습니다: ${safeText(connState.message, '서버 응답 없음')}`, 'state state-error'));
-      result.append(node('p', '이전 값을 지금 값처럼 표시하지 않습니다. PC 조회 실패와 SDP 연결 상태는 서로 다른 내용입니다. 다시 시도는 버튼을 직접 누르세요.', 'muted'));
+      result.append(failureScreen('연결·방화벽·기록을 읽지 못했습니다', [{ name: '연결·방화벽·기록 전체', reason: connState.message }]));
+      result.append(node('p', 'PC 조회 실패와 SDP 서버 연결 상태는 서로 다른 내용입니다. SDP 연결 여부는 이 실패로 판단하지 않습니다.', 'muted'));
       return;
     }
     const d = connState.data;
     const measuredAt = typeof d?.measuredAt === 'string' ? formatCheckedAt(d.measuredAt) : '확인 불가';
     result.append(node('p', `읽은 시각: ${measuredAt}`));
+    const failures = [];
     const pcList = node('ul');
     pcList.append(
-      connBlock('네트워크 연결', d?.network, networkText),
-      connBlock('방화벽 설정', d?.firewall, firewallText),
-      connBlock('Windows 경고·오류', d?.events?.system, eventText('System')),
-      connBlock('Windows 경고·오류', d?.events?.application, eventText('Application')),
+      connBlock('네트워크 연결', d?.network, networkText, failures),
+      connBlock('방화벽 설정', d?.firewall, firewallText, failures),
+      connBlock('Windows 경고·오류(System)', d?.events?.system, eventText('System'), failures),
+      connBlock('Windows 경고·오류(Application)', d?.events?.application, eventText('Application'), failures),
     );
     result.append(node('h4', 'PC 조회 결과(위 네 항목)'), pcList);
+    if (failures.length) result.append(failureScreen('일부 항목을 읽지 못했습니다(읽은 항목은 위에 그대로 표시)', failures));
     const sdp = d?.sdp && typeof d.sdp === 'object' ? d.sdp : null;
     const label = sdp && ['SDP 미연결', '예제 자료(SDP 연결 아님)', '확인 불가'].includes(sdp.label) ? sdp.label : '확인 불가';
     const reason = sdp && typeof sdp.reason === 'string' && sdp.reason ? safeText(sdp.reason) : '서버가 SDP 상태를 주지 않았습니다.';
@@ -663,6 +732,7 @@ function connectionView() {
     if (connState.status === 'loading') return;
     connState = { status: 'loading' };
     button.disabled = true;
+    result.setAttribute('aria-busy', 'true');
     draw();
     try {
       if (typeof fetch !== 'function') throw new Error('이 환경에서는 조회할 수 없습니다.');
@@ -673,22 +743,55 @@ function connectionView() {
       }
       connState = { status: 'ok', data: body.data };
     } catch (error) {
-      connState = { status: 'error', message: error?.message };
+      connState = { status: 'error', message: serverReason(error) };
     }
     button.disabled = false;
     draw();
+    focusResult(result);
   });
   draw();
   section.append(button, result);
-  return section;
+  return look(section, { marginTop: '1rem', padding: '0.75rem 0' });
+}
+
+// 핵심 기능 3가지(기록 보기 → 내 PC 상태 → 위험 알림)를 학생 칸 맨 위에 먼저 보여 줍니다.
+function jumpTo(target) {
+  if (!target) return;
+  target.tabIndex = -1;
+  if (typeof target.scrollIntoView === 'function') target.scrollIntoView({ block: 'start' });
+  if (typeof target.focus === 'function') target.focus();
+}
+
+function coreFeatureStrip(targets) {
+  const section = node('section', undefined, 'student-core');
+  section.dataset.testid = 'student-core';
+  section.setAttribute('aria-label', '핵심 기능 3가지');
+  section.append(look(node('h3', '핵심 기능 3가지(먼저 보세요)'), { fontSize: '1.25rem' }));
+  const list = look(node('ol'), { paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.05rem' });
+  const item1 = node('li', '기록 보기 · 지금 됨 · 왼쪽 메뉴의 「보안 기록」에서 봅니다. 연결이 없으면 조회 실패로 표시됩니다.');
+  const item2 = node('li', '내 PC 상태 · 지금 됨 · ');
+  const go2 = actionButton('내 PC 상태로 이동');
+  go2.addEventListener('click', () => jumpTo(targets.pc));
+  item2.append(go2);
+  const item3 = node('li', '위험 알림 · 아직 안 됨 · 시스템 연결 설정이 있어야 합니다. 지금은 연결 실패 알림만 보입니다. ');
+  const go3 = actionButton('알림 목록으로 이동');
+  go3.addEventListener('click', () => jumpTo(targets.alerts));
+  item3.append(go3);
+  list.append(item1, item2, item3);
+  section.append(list);
+  section.append(node('p', `상태 표시는 점검표(docs/FEATURE_CHECKLIST.md) 기준입니다. 아래 값은 ${VALUE_MEASURED}이고, 안내 화면의 예시는 ${VALUE_EXAMPLE}입니다.`, 'muted'));
+  return look(section, { marginBottom: '1rem', padding: '0.75rem 1rem', border: '2px solid rgba(124, 58, 237, 0.5)', borderRadius: '8px' });
 }
 
 function renderStatus(input) {
   const { devices, sessions, notifications, diagnostics, mode } = input || {};
   const root = node('div', undefined, 'student-status-view');
   root.dataset.testid = 'student-status-view';
+  const targets = {};
+  root.append(coreFeatureStrip(targets));
   root.append(dashboardView({ devices, sessions, notifications, diagnostics, mode }));
-  root.append(pcStatusView());
+  targets.pc = pcStatusView();
+  root.append(targets.pc);
   root.append(connectionView());
   root.append(node('h3', '연결 상태·알림'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
@@ -711,6 +814,7 @@ function renderStatus(input) {
 
   // 알림: 항목마다 어느 자료(resource)인지, 안전한 code, message 를 보여 줍니다.
   const alerts = node('section', undefined, 'status-notifications');
+  targets.alerts = alerts;
   alerts.append(node('h3', '알림'));
   if (!Array.isArray(notifications) || notifications.length === 0) {
     alerts.append(node('p', '주의할 알림이 없습니다.', 'state state-empty'));
