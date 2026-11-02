@@ -520,7 +520,7 @@ function dashboardView(input) {
   cards.append(
     statusCard('① 연결', labelOf(MODE_LABELS, typeof mode === 'string' ? mode : 'unknown'), `엔진 코드: ${engineCode}`, mode === 'connected' || mode === 'demo' ? 'ok' : 'warn'),
     statusCard('② 기기·세션', `기기 ${resourceBrief(devices, '대')} / 세션 ${resourceBrief(sessions, '개')}`, failed ? '일부 조회 실패' : undefined, failed ? 'warn' : 'ok'),
-    statusCard('③ 알림', notifyCount === null ? '확인 불가' : `${notifyCount}건`, notifyCount ? '아래 알림 목록을 확인하세요' : undefined, notifyCount ? 'warn' : 'ok'),
+    statusCard('③ 알림', notifyCount === null ? '확인 불가' : `${notifyCount}건`, notifyCount ? (mode === 'disconnected' ? '연결 실패 알림입니다 · 위험 판정 아님 · Windows 기록 건수와 별개' : '아래 알림 목록을 확인하세요 · Windows 기록 건수와 별개') : undefined, notifyCount ? 'warn' : 'ok'),
     statusCard('④ 마지막 확인', trend.length ? clockText(trend[0].at) : '아직 조회 결과 없음', '이 화면에서 직접 불러온 시각', 'ok'),
   );
   section.append(cards);
@@ -769,8 +769,8 @@ function coreFeatureStrip(targets) {
   section.setAttribute('aria-label', '핵심 기능 3가지');
   section.append(look(node('h3', '핵심 기능 3가지(먼저 보세요)'), { fontSize: '1.25rem' }));
   const list = look(node('ol'), { paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.05rem' });
-  const item1 = node('li', '기록 보기 · 지금 됨 · 왼쪽 메뉴의 「보안 기록」에서 봅니다. 연결이 없으면 조회 실패로 표시됩니다.');
-  const item2 = node('li', '내 PC 상태 · 지금 됨 · ');
+  const item1 = node('li', '기록 보기 · 사용 가능 · 왼쪽 메뉴의 「보안 기록」에서 봅니다. 연결이 없으면 조회 실패로 표시됩니다.');
+  const item2 = node('li', '내 PC 상태 · 사용 가능 · 값은 아래 「PC 상태 다시 조회」를 눌러야 읽습니다(누르기 전에는 「아직 읽지 않았습니다」). ');
   const go2 = actionButton('내 PC 상태로 이동');
   go2.addEventListener('click', () => jumpTo(targets.pc));
   item2.append(go2);
