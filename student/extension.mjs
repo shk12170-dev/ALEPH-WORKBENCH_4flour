@@ -501,7 +501,8 @@ function statusCard(title, value, note, tone) {
   const card = node('div', undefined, `dashboard-card dashboard-card-${tone}`);
   card.append(node('strong', title), look(node('p', value, 'dashboard-card-value'), { fontSize: '1.15rem', fontWeight: '700', margin: '0.25rem 0' }));
   if (note) card.append(node('p', note, 'muted'));
-  return look(card, { border: '1px solid rgba(124, 58, 237, 0.35)', borderLeft: `6px solid ${tone === 'ok' ? '#15803d' : '#b45309'}`, borderRadius: '8px', padding: '0.75rem 1rem' });
+  const edge = tone === 'ok' ? '#15803d' : tone === 'neutral' ? '#6b7280' : '#b45309';
+  return look(card, { border: '1px solid rgba(124, 58, 237, 0.35)', borderLeft: `6px solid ${edge}`, borderRadius: '8px', padding: '0.75rem 1rem' });
 }
 
 function dashboardView(input) {
@@ -755,6 +756,171 @@ function connectionView() {
   return look(section, { marginTop: '1rem', padding: '0.75rem 0' });
 }
 
+// ---- 완성하기 이후: 내 PC 실시간 확인 6칸 (기존 GET /api/pc-status, /api/pc-connection 재사용) ----
+// 기본은 꺼져 있고 「10초마다 확인」을 체크했을 때만 반복합니다. 앞 조회가 끝난 뒤 10초를 세므로 겹치지 않고, 앱 탭이 안 보이면 멈춥니다.
+// 조회에 실패하면 이전 값을 남기지 않고 확인 불가로 바꿉니다. 칸의 색은 값을 읽었는지만 나타내며 정상·안전 판정이 아닙니다.
+const LIVE_INTERVAL_MS = 10000;
+const LIVE_TIMEOUT_MS = 20000;
+const LIVE_SOURCES = { pc: '/api/pc-status', conn: '/api/pc-connection' };
+const live = {
+  auto: false, draw: null, section: null, listening: false,
+  pc: { busy: false, timer: null, data: null, error: null },
+  conn: { busy: false, timer: null, data: null, error: null },
+};
+
+function liveHidden() {
+  return document.hidden === true;
+}
+
+function liveStop(key) {
+  clearTimeout(live[key].timer);
+  live[key].timer = null;
+}
+
+function liveSchedule(key) {
+  liveStop(key);
+  if (!live.auto || liveHidden()) return;
+  live[key].timer = setTimeout(() => {
+    live[key].timer = null;
+    if (live.section?.isConnected === false) return;
+    void liveRead(key);
+  }, LIVE_INTERVAL_MS);
+}
+
+async function liveRead(key) {
+  const slot = live[key];
+  if (slot.busy || liveHidden()) return;
+  liveStop(key);
+  slot.busy = true;
+  live.draw?.();
+  const abort = new AbortController();
+  const deadline = setTimeout(() => abort.abort(), LIVE_TIMEOUT_MS);
+  try {
+    if (typeof fetch !== 'function') throw new Error('이 환경에서는 조회할 수 없습니다.');
+    const response = await fetch(LIVE_SOURCES[key], { headers: { accept: 'application/json' }, signal: abort.signal });
+    const body = await response.json();
+    if (!response.ok || !body || body.ok !== true || !body.data || typeof body.data !== 'object') {
+      throw new Error(body?.error?.message ?? `서버가 ${response.status}로 응답했습니다.`);
+    }
+    slot.data = body.data;
+    slot.error = null;
+  } catch (error) {
+    slot.data = null;
+    slot.error = error?.name === 'AbortError' ? '시간 초과로 읽지 못했습니다.' : serverReason(error);
+  }
+  clearTimeout(deadline);
+  slot.busy = false;
+  live.draw?.();
+  liveSchedule(key);
+}
+
+function liveListen() {
+  if (live.listening || typeof document.addEventListener !== 'function') return;
+  live.listening = true;
+  document.addEventListener('visibilitychange', () => {
+    if (!live.auto) return;
+    if (liveHidden()) { liveStop('pc'); liveStop('conn'); return; }
+    void liveRead('pc');
+    void liveRead('conn');
+  });
+}
+
+function liveItem(item, format) {
+  if (!item || typeof item !== 'object' || item.status !== 'ok') {
+    return { reason: item && typeof item.reason === 'string' && item.reason ? safeText(item.reason) : '서버가 값을 주지 않았습니다.' };
+  }
+  return format(item) ?? { reason: '응답 값이 올바르지 않습니다.' };
+}
+
+function liveCard(title, slot, read) {
+  if (slot.error) return statusCard(title, '이번 조회 확인 불가', `이유: ${slot.error} · 이전 값을 현재 값으로 보여 주지 않습니다.`, 'warn');
+  if (!slot.data) return statusCard(title, slot.busy ? '읽는 중…' : '아직 읽지 않음', undefined, 'neutral');
+  const info = read(slot.data);
+  return info.reason ? statusCard(title, '확인 불가', `이유: ${info.reason}`, 'warn') : statusCard(title, info.value, info.note, 'neutral');
+}
+
+function liveLogText(name, item) {
+  const e = pcNumber(item?.error); const w = pcNumber(item?.warning);
+  return item?.status === 'ok' && e !== null && w !== null ? `${name} 오류 ${e}건 · 경고 ${w}건` : `${name} 확인 불가`;
+}
+
+function liveEvents(data) {
+  const { system, application } = data?.events ?? {};
+  if (system?.status !== 'ok' && application?.status !== 'ok') return liveItem(system, () => null);
+  const hours = pcNumber(system?.hours) ?? pcNumber(application?.hours) ?? '?';
+  return { value: `${liveLogText('System', system)} / ${liveLogText('Application', application)}`, note: `최근 ${hours}시간 건수입니다. 침해 판정이 아닙니다.` };
+}
+
+function liveCards() {
+  const { pc, conn } = live;
+  return [
+    liveCard('CPU', pc, (d) => liveItem(d.cpu, (i) => {
+      const v = pcNumber(i.value);
+      return v === null ? null : { value: `${v}% 사용`, note: `약 ${pcNumber(i.windowMs) ?? '?'}ms 동안 평균` };
+    })),
+    liveCard('메모리', pc, (d) => liveItem(d.memory, (i) => {
+      const used = pcNumber(i.usedGiB); const total = pcNumber(i.totalGiB); const pct = pcNumber(i.percent);
+      return used === null || total === null || pct === null ? null : { value: `${used} GiB / ${total} GiB`, note: `${pct}% 사용` };
+    })),
+    liveCard('디스크', pc, (d) => liveItem(d.disk, (i) => {
+      const free = pcNumber(i.freeGiB); const total = pcNumber(i.totalGiB);
+      return free === null || total === null ? null : { value: `${free} GiB 남음 / ${total} GiB`, note: '앱 폴더가 있는 드라이브' };
+    })),
+    liveCard('네트워크', conn, (d) => liveItem(d.network, (i) => (Array.isArray(i.adapters)
+      ? { value: `연결됨 ${i.adapters.filter((a) => a?.connected === true).length}개 / 전체 ${i.adapters.length}개`, note: '어댑터 상태만 읽습니다. 인터넷 접속이나 ZTNA 허용을 확인한 결과가 아닙니다.' }
+      : null))),
+    liveCard('Windows 방화벽', conn, (d) => liveItem(d.firewall, (i) => (Array.isArray(i.profiles)
+      ? { value: i.profiles.map((p) => `${safeText(p?.name, '이름 없음')} ${p?.enabled === true ? '켜짐' : p?.enabled === false ? '꺼짐' : '확인 불가'}`).join(' · '), note: '읽기만 함(바꾸지 않음). 보호 전체의 안전 판정이 아닙니다.' }
+      : null))),
+    liveCard('Windows 기록', conn, liveEvents),
+  ];
+}
+
+function livePcPanel() {
+  const section = node('section', undefined, 'student-live-pc');
+  section.dataset.testid = 'student-live-pc';
+  section.append(node('h3', '내 PC 실시간 확인(6칸)'));
+  section.append(node('p', `값 출처: ${VALUE_MEASURED} · 이 PC에서 일반 권한으로 읽기만 합니다. 설정은 바꾸지 않습니다. 보안 서버(SDP) 연결 상태와 별개입니다.`, 'muted'));
+  const button = actionButton('내 PC 확인');
+  const auto = withFocusRing(node('input'));
+  auto.type = 'checkbox';
+  auto.checked = live.auto;
+  auto.setAttribute('aria-label', '10초마다 확인');
+  const label = look(node('label'), { marginLeft: '0.75rem', cursor: 'pointer' });
+  label.append(auto, node('span', ' 10초마다 확인 (앱 탭이 보이는 동안)'));
+  const line = node('p', undefined, 'muted');
+  const cards = look(node('div', undefined, 'dashboard-cards'), { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(13rem, 1fr))', gap: '0.75rem' });
+
+  function draw() {
+    const { pc, conn } = live;
+    const seen = (slot) => {
+      const at = new Date(slot.data?.measuredAt ?? NaN);
+      return Number.isNaN(at.getTime()) ? '없음' : clockText(at);
+    };
+    line.textContent = pc.data || conn.data || pc.busy || conn.busy || pc.error || conn.error
+      ? `${pc.busy || conn.busy ? '이 PC에서 읽는 중… · ' : ''}마지막 실측: CPU·메모리·디스크 ${seen(pc)} · 네트워크·방화벽·기록 ${seen(conn)}`
+      : '아직 읽지 않았습니다. 「내 PC 확인」을 누르거나 「10초마다 확인」을 체크하면 읽습니다.';
+    line.setAttribute('aria-live', live.auto ? 'off' : 'polite');
+    cards.replaceChildren(...liveCards());
+  }
+
+  live.draw = draw;
+  live.section = section;
+  liveListen();
+  button.addEventListener('click', () => { void liveRead('pc'); void liveRead('conn'); });
+  auto.addEventListener('change', () => {
+    live.auto = auto.checked;
+    if (live.auto) { void liveRead('pc'); void liveRead('conn'); } else { liveStop('pc'); liveStop('conn'); draw(); }
+  });
+  draw();
+  section.append(button, label, line, cards);
+  section.append(node('p', '앞 조회가 끝난 뒤 10초를 세므로 실제 간격은 10초보다 깁니다. 네트워크·방화벽·기록은 읽는 데 10초 안팎 걸립니다. 아래 「내 PC 상태」·「연결과 기록」 칸은 버튼으로 읽는 상세 보기입니다.', 'muted'));
+  if (live.auto) {
+    for (const key of ['pc', 'conn']) if (!live[key].busy && live[key].timer === null) liveSchedule(key);
+  }
+  return look(section, { marginTop: '1rem', padding: '0.75rem 0' });
+}
+
 // 핵심 기능 3가지(기록 보기 → 내 PC 상태 → 위험 알림)를 학생 칸 맨 위에 먼저 보여 줍니다.
 function jumpTo(target) {
   if (!target) return;
@@ -770,7 +936,7 @@ function coreFeatureStrip(targets) {
   section.append(look(node('h3', '핵심 기능 3가지(먼저 보세요)'), { fontSize: '1.25rem' }));
   const list = look(node('ol'), { paddingLeft: '1.5rem', lineHeight: '1.8', fontSize: '1.05rem' });
   const item1 = node('li', '기록 보기 · 사용 가능 · 왼쪽 메뉴의 「보안 기록」에서 봅니다. 연결이 없으면 조회 실패로 표시됩니다.');
-  const item2 = node('li', '내 PC 상태 · 사용 가능 · 값은 아래 「PC 상태 다시 조회」를 눌러야 읽습니다(누르기 전에는 「아직 읽지 않았습니다」). ');
+  const item2 = node('li', '내 PC 상태 · 사용 가능 · 값은 아래 「내 PC 확인」을 누르거나 「10초마다 확인」을 체크해야 읽습니다(그 전에는 「아직 읽지 않았습니다」). ');
   const go2 = actionButton('내 PC 상태로 이동');
   go2.addEventListener('click', () => jumpTo(targets.pc));
   item2.append(go2);
@@ -790,9 +956,10 @@ function renderStatus(input) {
   root.dataset.testid = 'student-status-view';
   const targets = {};
   root.append(coreFeatureStrip(targets));
-  root.append(dashboardView({ devices, sessions, notifications, diagnostics, mode }));
-  targets.pc = pcStatusView();
+  targets.pc = livePcPanel();
   root.append(targets.pc);
+  root.append(dashboardView({ devices, sessions, notifications, diagnostics, mode }));
+  root.append(pcStatusView());
   root.append(connectionView());
   root.append(node('h3', '연결 상태·알림'));
   root.append(node('p', modeText(mode), `identity-mode identity-mode-${typeof mode === 'string' ? mode : 'unknown'}`));
@@ -1287,7 +1454,9 @@ function renderVulnerabilities(input) {
   const summary = node('dl');
   if (data.lockfileVersion !== undefined && data.lockfileVersion !== null) summary.append(node('dt', '잠금 파일 버전(lockfileVersion)'), node('dd', safeText(String(data.lockfileVersion))));
   if (typeof data.lockfileHash === 'string' && data.lockfileHash) summary.append(node('dt', '잠금 파일 해시(lockfileHash)'), node('dd', safeText(data.lockfileHash)));
-  if (typeof data.checkedAt === 'string' && data.checkedAt) summary.append(node('dt', '조회 시각(checkedAt)'), node('dd', safeText(data.checkedAt)));
+  // 조회를 시작하지 못한 not_configured 의 시각은 실제 OSV 조회 시각이 아니라 상태를 확인한 시각입니다.
+  const checkedLabel = data.status === 'not_configured' ? '상태 확인 시각(실제 OSV 조회 아님)' : '조회 시각(checkedAt)';
+  if (typeof data.checkedAt === 'string' && data.checkedAt) summary.append(node('dt', checkedLabel), node('dd', formatCheckedAt(safeText(data.checkedAt))));
   if (summary.children.length > 0) root.append(summary);
 
   if (rows.length === 0) {
