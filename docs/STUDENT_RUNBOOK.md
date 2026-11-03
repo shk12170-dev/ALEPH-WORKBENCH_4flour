@@ -1,10 +1,10 @@
 # 다이브 학생용 실행 설명서와 시스템 구성도 (21단계)
 
-이 문서는 학생이 직접 작성한 설명서이며 제공 문서(`README.md`, `docs/STUDENT_LAUNCH_GUIDE.md` 등)를 바꾸지 않습니다. 이 문서가 들어 있는 커밋의 파일을 기준으로 쓰였고, 아래 「확인 방법」 칸에 **실제 실행**, **코드에서 확인**, **모의 입력**, **미확인**을 구분해 적었습니다. 실행하지 않은 것을 확인했다고 쓰지 않습니다. 키·토큰·비밀번호는 이 문서에 없습니다.
+이 문서는 학생이 직접 작성한 설명서입니다. 제공 문서(`docs/STUDENT_LAUNCH_GUIDE.md` 등)는 바꾸지 않았고, `README.md`에는 안내 한 줄과 아래쪽 「학생 실행 설명서」만 학생이 썼습니다. 21단계에 처음 쓰고 완성하기 단계(2026-11-03)에 학생 추가 기능을 반영했습니다. 이 문서가 들어 있는 커밋의 파일을 기준으로 쓰였고, 아래 「확인 방법」 칸에 **실제 실행**, **코드에서 확인**, **모의 입력**, **미확인**을 구분해 적었습니다. 실행하지 않은 것을 확인했다고 쓰지 않습니다. 키·토큰·비밀번호는 이 문서에 없습니다.
 
 ## 1. 목적과 기능
 
-다이브는 회사 직원이 자기 로그인 상태, 업무 앱 접속 판정, 접속 기록·보안 경보를 보는 로컬 보안 앱입니다. 서버는 내 PC의 `127.0.0.1`에서만 열립니다. 학생은 `student/extension.mjs`의 화면 함수 8개를 구현했습니다(6장).
+다이브는 회사 직원이 자기 로그인 상태, 업무 앱 접속 판정, 접속 기록·보안 경보를 보는 로컬 보안 앱입니다. 서버는 내 PC의 `127.0.0.1`에서만 열립니다. 학생은 `student/extension.mjs`의 화면 함수 8개를 구현했고(6장), 완성하기 단계에서 내 PC 상태·연결 조회 API, 내 PC 점검 화면 `/pc`, 점검 기록 화면 `/checks`를 더했습니다.
 
 | 단계 | 화면 함수 | 보여 주는 것 |
 |---|---|---|
@@ -36,10 +36,10 @@ Node.js가 `v24.19.0`이 아니면 실행 도구가 "참고: 지금 Node.js 는 
 
 | 경로 | 역할 | 작성 |
 |---|---|---|
-| `student/extension.mjs` | 화면 함수 8개(`renderIdentity`~`renderVulnerabilities`)와 `createStudentView()` | **학생** |
+| `student/extension.mjs`, `student/pc.*`, `student/checks.*`, `src/pc-status/` | 화면 함수 8개(`renderIdentity`~`renderVulnerabilities`)와 `createStudentView()`, 6칸 패널, 내 PC 점검·점검 기록 화면, PC 조회·자체 점검 API | **학생** |
 | `student/engine-adapter.mjs` | 접근 제어·XDR 시스템과의 연결 자리(기본은 `evidenceMode: 'disconnected'`) | 제공(학생이 바꾸지 않음) |
 | `docs/STUDENT_RUNBOOK.md` | 이 문서 | **학생** |
-| `src/server.mjs` | 로컬 앱 서버. 정적 화면과 `/api/*` 제공 | 제공 |
+| `src/server.mjs` | 로컬 앱 서버. 정적 화면과 `/api/*` 제공 | 제공(학생이 `/api/pc-status`·`/api/pc-connection`·`/api/checks`와 `/pc`·`/checks` 경로만 더함) |
 | `src/engine.mjs`, `src/engine/` | 엔진 어댑터 로딩, SDP 호스트 연결 | 제공 |
 | `src/ai/`, `src/connection/`, `src/learner-support/` | AI 게이트웨이 연결, 계정 연결, 도움정보 | 제공 |
 | `src/actions/` | 조치 준비·전달·결과 조회 서버 쪽 | 제공 |
@@ -93,6 +93,9 @@ flowchart LR
   S -->|"engine 어댑터\nstudent/engine-adapter.mjs"| E["접근 제어·XDR 시스템 (SDP 호스트)\nsrc/engine/sdp-host.mjs"]
   S -->|"AI 게이트웨이 연결\nsrc/ai/*, ON_AI_MODEL"| G["AI 게이트웨이"]
   S -->|"허용 패키지만\nsrc/vulnerabilities/osv.mjs"| O["OSV 공개 조회\nhttps://api.osv.dev/v1/querybatch"]
+  S -->|"학생 추가: /api/pc-status, /api/pc-connection\nsrc/pc-status/ (읽기 전용)"| L["이 PC의 운영체제\nCPU·메모리·디스크·네트워크·방화벽·Windows 기록"]
+  S -->|"학생 추가: 정적 화면 /pc, /checks"| W["student/pc.*, student/checks.*\n내 PC 점검 · 점검 기록"]
+  S -->|"학생 추가: /api/checks\nGET만, 이 서버 자신에게"| S
 ```
 
 ### 글로 쓴 구성도
@@ -109,8 +112,11 @@ flowchart LR
                                           |        (기본 실행은 설정 안 됨: ai.configured = false)
                                           |-- /api/actions/prepare|execute|result --> 조치 처리 서버 쪽(src/actions/)
                                           |        (지원 조치가 없으면 실제 처리 경로가 열리지 않음)
-                                          `-- /api/vulnerabilities --> [OSV 공개 조회]
-                                                   (허용 패키지 목록이 비면 외부 조회를 하지 않음)
+                                          |-- /api/vulnerabilities --> [OSV 공개 조회]
+                                          |        (허용 패키지 목록이 비면 외부 조회를 하지 않음)
+                                          |-- /api/pc-status, /api/pc-connection --> [이 PC의 운영체제] (학생 추가, 읽기 전용)
+                                          |-- /pc, /checks --> student/pc.*, student/checks.* (학생 추가 화면)
+                                          `-- /api/checks --> 이 서버 자신에게 GET 요청만 보내 사례별 대조 (학생 추가)
 ```
 
 위 구성도에서 각 `/api/*` 경로가 어느 연결로 이어지는지는 서버 경로 목록(`src/server.mjs`)과 파일 이름·머리말 주석을 읽고 정리한 것입니다. 실제 연결을 켜서 확인한 것은 아닙니다(7장 참고).
@@ -125,13 +131,17 @@ flowchart LR
 | 접근 제어·XDR 시스템 | `src/engine/sdp-host.mjs`, `student/engine-adapter.mjs` | 본인·기기·업무 앱 판정·보안 기록 | **연결 안 됨**(`ENGINE_NOT_CONNECTED`) |
 | AI 게이트웨이 | `src/ai/` | 앱 안 AI 연결 점검·사건 설명 | **설정 안 됨**(`ai.configured: false`) |
 | OSV 공개 조회 | `src/vulnerabilities/` | 허용된 공개 패키지의 취약점 조회 | 허용 목록이 비어 조회하지 않음(코드에서 확인) |
+| PC 조회(학생 추가) | `src/pc-status/service.mjs`, `connection.mjs` | CPU·메모리·디스크, 네트워크·방화벽·Windows 기록 건수 읽기 | 실제 실행으로 확인(2026-11-03) |
+| 화면(학생 추가) | `/pc`, `/checks` | 내 PC 점검, 점검 기록 | 앱 내장 브라우저로 실제 화면 확인(2026-11-03) |
+| 자체 점검(학생 추가) | `src/pc-status/checks.mjs`, `GET /api/checks` | 이 서버에 GET만 보내 사례 11건 대조, 미실행 5건 따로 | 실제 실행으로 확인: 일치 11, 미실행 5(2026-11-03) |
 
 ## 6. 구현한 함수와 제공 코드의 경계
 
 | 구분 | 내용 |
 |---|---|
-| **학생이 작성** | `student/extension.mjs`의 `renderIdentity`, `renderDecision`, `renderEvents`(상세 영역의 미지원 조치 안내 포함), `renderStatus`(도움정보 복사 버튼 포함), `renderAiConnection`, `renderExplanation`, `renderAction`, `renderVulnerabilities`, `createStudentView`. 이 문서 |
-| **제공(수정하지 않음)** | `src/` 전체, `public/` 전체, `tools/`, `vendor/`, `student/engine-adapter.mjs`, `docs/`의 제공 문서 |
+| **학생이 작성** | `student/extension.mjs`의 `renderIdentity`, `renderDecision`, `renderEvents`(상세 영역의 미지원 조치 안내 포함), `renderStatus`(도움정보 복사 버튼 포함), `renderAiConnection`, `renderExplanation`, `renderAction`, `renderVulnerabilities`, `createStudentView`. 이 문서. 완성하기 단계: `src/pc-status/`(PC 조회, 자체 점검), `student/pc.*`, `student/checks.*`, `docs/QUICKSTART_ONE_PAGE.md`, `docs/FEATURE_CHECKLIST.md`, `docs/DEMO_AND_LIMITS.md` |
+| **제공(수정하지 않음)** | `src/`의 나머지(엔진·AI·연결·조치·OSV), `public/` 전체, `tools/`, `vendor/`, `student/engine-adapter.mjs`, `docs/`의 제공 문서 |
+| **제공이지만 학생이 고침** | `src/server.mjs`: 학생 API(`/api/pc-status`, `/api/pc-connection`, `/api/checks`)와 화면 경로(`/pc`, `/checks`)만 더함. 스타터를 업데이트하면 덮어써질 수 있음. `README.md`: 안내 한 줄과 「학생 실행 설명서」 |
 | **경계** | 제공 화면이 서버에서 값을 가져와 검증하고 학생 함수에 전달합니다. 학생 함수는 값을 글자로 표시하기만 하며, 서버를 직접 호출하거나 조치 요청을 보내지 않습니다. 확인 번호·토큰은 학생 코드에 전달되지 않습니다 |
 | **엔진 출처** | 접근 제어·XDR 연결은 제공 엔진 코드(`src/engine/`)이며 학생이 만든 것이 아닙니다 |
 
