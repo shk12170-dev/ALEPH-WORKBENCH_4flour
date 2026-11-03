@@ -160,6 +160,13 @@ const KIND_LABELS = { access: '접속', xdr: 'XDR 경보' };
 const ACCESS_LABELS = { allowed: '허용됨', denied: '거부됨', unknown: '확인 불가' };
 const MISSING_APP = '';
 
+// 접속 상태별 색. 허용은 초록, 거부는 빨강, 그 밖(확인 불가 포함)은 노랑 계열이며 어떤 경우에도 글자 설명이 함께 붙습니다.
+function accessColor(value) {
+  if (value === 'allowed') return { bg: '#dcfce7', fg: '#14532d', edge: '#16a34a' };
+  if (value === 'denied') return { bg: '#fee2e2', fg: '#7f1d1d', edge: '#dc2626' };
+  return { bg: '#fef3c7', fg: '#78350f', edge: '#d97706' };
+}
+
 function withCode(table, value) {
   const known = typeof value === 'string' && Object.hasOwn(table, value) ? value : 'unknown';
   const raw = typeof value === 'string' && value ? value : 'unknown';
@@ -278,7 +285,7 @@ function renderEvents(input) {
   const kindFilter = filterBox('기록 종류', [['all', '전체'], ...kinds.map((k) => [String(k), kindText(k)])]);
   const appFilter = filterBox('업무 앱', [['all', '전체'], ...apps.map((a) => [a, a === MISSING_APP ? '앱을 확인할 수 없음' : a])]);
   const accessFilter = filterBox('접속 상태', [['all', '전체'], ...accesses.map((a) => [String(a), withCode(ACCESS_LABELS, a)])]);
-  const filters = node('div', undefined, 'student-event-filters');
+  const filters = look(node('div', undefined, 'student-event-filters'), { display: 'flex', flexWrap: 'wrap', gap: '0.75rem 1.25rem', margin: '0.75rem 0' });
   filters.append(kindFilter.label, appFilter.label, accessFilter.label);
 
   const count = node('p', undefined, 'student-event-count');
@@ -288,6 +295,16 @@ function renderEvents(input) {
   detailSlot.setAttribute('aria-live', 'polite');
   let selectedId = null;
 
+  // 지금 상세를 보고 있는 기록 한 줄만 배경으로 표시합니다(글자로도 aria-current 를 붙입니다).
+  function markSelected() {
+    for (const row of Array.from(list.children)) {
+      const on = selectedId !== null && row.dataset?.studentEventId === selectedId;
+      if (on) row.setAttribute('aria-current', 'true');
+      else if (row.removeAttribute) row.removeAttribute('aria-current');
+      look(row, { background: on ? 'rgba(124, 58, 237, 0.08)' : '' });
+    }
+  }
+
   function draw() {
     const shown = events.filter((e) => (kindFilter.select.value === 'all' || String(e.kind) === kindFilter.select.value)
       && (appFilter.select.value === 'all' || appOf(e) === appFilter.select.value)
@@ -296,19 +313,23 @@ function renderEvents(input) {
     list.replaceChildren();
     if (shown.length === 0) list.append(node('li', '선택한 조건에 맞는 기록이 없습니다.', 'state state-empty'));
     for (const event of shown) {
-      const row = node('li', undefined, 'student-event-row');
+      const row = look(node('li', undefined, 'student-event-row'), { listStyle: 'none', margin: '0.5rem 0', padding: '0.6rem 0.9rem', border: '1px solid rgba(124, 58, 237, 0.25)', borderLeft: `6px solid ${accessColor(event.state?.access).edge}`, borderRadius: '8px' });
       row.dataset.studentEventId = event.id;
-      row.append(node('span', `사건 ID: ${event.id} · 시각: ${formatCheckedAt(event.at)} · 종류: ${kindText(event.kind)} · 앱: ${appText(event.appId)} · 요약: ${event.summary ?? '요약 없음'} `));
-      const button = node('button', `${event.id} 상세`);
-      button.type = 'button';
-      button.setAttribute('aria-label', `${event.id} 상세`);
+      // 접속 상태는 색과 글자를 함께 씁니다. 확인 불가·거부는 정상처럼 보이지 않게 따로 눈에 띄게 합니다.
+      const tone = accessColor(event.state?.access);
+      const chip = look(node('strong', withCode(ACCESS_LABELS, event.state?.access)), { display: 'inline-block', padding: '0.1rem 0.6rem', borderRadius: '999px', background: tone.bg, color: tone.fg, fontSize: '0.9rem' });
+      const summary = look(node('p', `요약: ${event.summary ?? '요약 없음'} `), { margin: '0.4rem 0 0.2rem', fontWeight: '600', lineHeight: '1.5' });
+      const meta = look(node('p', `사건 ID: ${event.id} · 시각: ${formatCheckedAt(event.at)} · 종류: ${kindText(event.kind)} · 앱: ${appText(event.appId)}`, 'muted'), { margin: '0 0 0.5rem', lineHeight: '1.5' });
+      const button = actionButton(`${event.id} 상세`);
       button.addEventListener('click', () => {
         selectedId = event.id;
         detailSlot.replaceChildren(eventDetail(event));
+        markSelected();
       });
-      row.append(button);
+      row.append(chip, summary, meta, button);
       list.append(row);
     }
+    markSelected();
     // 걸러져서 보이지 않게 된 기록의 상세는 지웁니다.
     if (selectedId !== null && !shown.some((e) => e.id === selectedId)) {
       selectedId = null;
