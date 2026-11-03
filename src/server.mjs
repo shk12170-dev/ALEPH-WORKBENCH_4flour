@@ -18,6 +18,7 @@ import {createConnectionManager} from './connection/manager.mjs';
 import {createProjectScanner} from './vulnerabilities/project-scan.mjs';
 import {createPcStatusService} from './pc-status/service.mjs';
 import {createPcConnectionService} from './pc-status/connection.mjs';
+import {createChecksService} from './pc-status/checks.mjs';
 import {buildLocalLearnerSupportGuide,isLearnerSupportProblemKind,readLocalLearnerSupportObservation} from './learner-support/service.mjs';
 import {nativeOwn,nativePublicError} from './connection/native-login.mjs';
 import {createNativeHostContext,captureNativeHostConfiguration,readNativeHostConfiguration,openNativeHostOperation,readNativeHostOperation,assertNativeHostOperation,createNativeOperationVault,closeNativeHostOperation} from './connection/native-context.mjs';
@@ -30,6 +31,8 @@ const files=new Map([['/','public/index.html'],['/index.html','public/index.html
   ['/ai-connect.mjs','public/ai-connect.mjs'],
   // 학생 추가: 내 PC 점검 별도 화면(student/pc.*). 기존 /api/pc-status, /api/pc-connection 만 씁니다.
   ['/pc','student/pc.html'],['/student/pc.mjs','student/pc.mjs'],['/student/pc.css','student/pc.css'],
+  // 학생 추가: 점검 기록(작전실) 화면. GET /api/checks 결과만 보여 줍니다.
+  ['/checks','student/checks.html'],['/student/checks.mjs','student/checks.mjs'],
   ...['alekov-ai-explain','alekov-app-icon','alekov-connect-approval','alekov-connection-unknown','alekov-empty-records'].map(name=>[`/assets/alekov/${name}.webp`,`public/assets/alekov/${name}.webp`])]);
 const connectionRoutes=new Map(['start','finish','status','cancel'].map(kind=>[`/api/ai/connect/${kind}`,kind]));
 const safeErrors=Object.freeze({
@@ -214,6 +217,7 @@ export function createOnServer(serverOptions={}) {
   if(nativeConfiguration&&(ai!==undefined||resolveAiIdentity!==undefined||readLearnerSupportIdentity!==undefined||appCredentialVault!==undefined||vaultAiConfiguration!==undefined||aiConnectionConfiguration!==undefined||typeof aiEnv.ON_AI_APP_KEY==='string'&&aiEnv.ON_AI_APP_KEY))throw Error('INVALID_SERVER_AI_CONFIGURATION');
   const pcStatus=createPcStatusService({clock});
   const pcConnection=createPcConnectionService({clock});
+  const checks=createChecksService({root:assetsRoot,clock});
   const nativeHost=nativeConfiguration?createNativeHostContext(nativeConfiguration):null;
   // c2(#978): host 가 sdpActionStartup({databasePath, policy})을 주면, 이 서버가 만든 SDP host engine 과 genuine native host 를
   // createSdpActionConfiguration 에 그대로 넘긴다(자기 철회 뒤 본인 영수증 포함). identityVersion 은 같은 native host operation 에서 읽는다.
@@ -700,6 +704,12 @@ export function createOnServer(serverOptions={}) {
       if(req.method==='GET'&&url.pathname==='/api/pc-connection'){
         // 3일차(학생 추가): 네트워크·방화벽·Windows 기록 건수를 읽기만 한다. 설정은 바꾸지 않는다.
         send(200,{ok:true,data:await pcConnection.read(mode)});return;
+      }
+      if(req.method==='GET'&&url.pathname==='/api/checks'){
+        // 10일차(학생 추가): 이 서버 자신에게 GET 요청만 보내 사례별로 대조한다. 한 번에 하나만 실행한다.
+        const data=await checks.run({port:req.socket.localPort,mode});
+        if(!data){send(409,{ok:false,error:{code:'CHECK_RUNNING',message:'다른 점검이 진행 중입니다. 끝난 뒤 다시 실행하세요.',retryable:true}});return;}
+        send(200,{ok:true,data});return;
       }
       if(req.method==='GET'&&url.pathname==='/api/vulnerabilities'){
         const data=await bounded(signal=>scanner.scan({signal}));send(200,{ok:true,data});

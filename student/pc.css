@@ -83,7 +83,22 @@ button, input { font: inherit; }
 .pc-bar { display: inline-block; vertical-align: middle; width: 96px; height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; margin-left: 6px; }
 .pc-bar-fill { display: block; height: 100%; background: var(--bar); }
 
+/* 점검 기록 화면(/checks) */
+.pc-nav { display: flex; gap: 16px; flex-wrap: wrap; }
+.pc-cards-5 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.pc-card[data-state="ok"] { background: #f0fdf4; border-color: #bbf7d0; }
+.pc-meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0 0 16px; font-size: 13px; }
+.pc-meta dt { color: var(--muted); }
+.pc-meta dd { margin: 0; overflow-wrap: anywhere; }
+.pc-result { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--bg); color: var(--muted); }
+.pc-result[data-result="match"] { background: #dcfce7; color: #166534; }
+.pc-result[data-result="mismatch"], .pc-result[data-result="unverified"] { background: var(--bad-bg); color: var(--bad-ink); }
+.pc-checks-body .pc-table { margin-bottom: 8px; }
+.pc-checks-body .pc-table th:first-child, .pc-checks-body .pc-table td:first-child { white-space: nowrap; }
+.pc-checks-body { overflow-x: auto; }
+
 @media (max-width: 640px) {
+  .pc-meta { grid-template-columns: 1fr; }
   .pc-panel { padding: 16px; }
   .pc-bar { width: 56px; }
   .pc-table th, .pc-table td { padding: 8px; }

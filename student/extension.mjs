@@ -950,7 +950,10 @@ function coreFeatureStrip(targets) {
   // 내 PC 점검만 따로 보는 화면(/pc, student/pc.html)으로 이동합니다.
   const pcPage = look(node('a', '내 PC 점검 화면 열기 ↗', 'student-pc-page-link'), { display: 'inline-block', margin: '0.25rem 0 0.5rem', fontWeight: '600' });
   pcPage.href = '/pc';
-  section.append(pcPage);
+  // 앱이 스스로를 사례별로 대조하는 점검 기록 화면(/checks)으로 이동합니다.
+  const checksPage = look(node('a', '점검 기록 열기 ↗', 'student-checks-page-link'), { display: 'inline-block', margin: '0.25rem 0 0.5rem 1rem', fontWeight: '600' });
+  checksPage.href = '/checks';
+  section.append(pcPage, checksPage);
   section.append(node('p', `상태 표시는 점검표(docs/FEATURE_CHECKLIST.md) 기준입니다. 아래 값은 ${VALUE_MEASURED}이고, 안내 화면의 예시는 ${VALUE_EXAMPLE}입니다.`, 'muted'));
   return look(section, { marginBottom: '1rem', padding: '0.75rem 1rem', border: '2px solid rgba(124, 58, 237, 0.5)', borderRadius: '8px' });
 }

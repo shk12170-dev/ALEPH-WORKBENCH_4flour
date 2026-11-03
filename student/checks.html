@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>케셰브 · 점검 기록</title>
+  <link rel="stylesheet" href="/student/pc.css">
+  <script type="module" src="/student/checks.mjs"></script>
+</head>
+<body>
+  <header class="pc-top">
+    <div class="pc-top-inner">
+      <a class="pc-brand" href="/"><span class="pc-logo" aria-hidden="true">K</span>케셰브<span class="pc-brand-sub">점검 기록</span></a>
+      <nav class="pc-nav"><a class="pc-back" href="/pc">내 PC 점검 ↗</a><a class="pc-back" href="/">기존 보안 화면 열기 ↗</a></nav>
+    </div>
+  </header>
+  <main class="pc-main">
+    <section class="pc-hero">
+      <div>
+        <p class="pc-eyebrow">이 앱이 스스로 대조합니다</p>
+        <h1>숫자마다 어디서<br>나왔는지 보여 줍니다.</h1>
+      </div>
+      <p class="pc-hero-note">이 PC의 앱 서버에 읽기 요청(GET)만 보내 사례별 기대와 실제 응답을 대조합니다.<br>실행하지 않은 사례는 이유와 함께 따로 적고 일치 합계에 넣지 않습니다.</p>
+    </section>
+    <div id="checks-app" class="pc-app">
+      <p class="pc-muted">화면을 준비하는 중입니다. 계속 이 문구만 보이면 서버가 켜져 있는지 확인하세요.</p>
+    </div>
+  </main>
+</body>
+</html>
