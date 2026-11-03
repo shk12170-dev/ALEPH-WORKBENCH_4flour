@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>케셰브 · 내 PC 점검</title>
+  <link rel="stylesheet" href="/student/pc.css">
+  <script type="module" src="/student/pc.mjs"></script>
+</head>
+<body>
+  <header class="pc-top">
+    <div class="pc-top-inner">
+      <a class="pc-brand" href="/"><span class="pc-logo" aria-hidden="true">K</span>케셰브<span class="pc-brand-sub">내 PC 점검</span></a>
+      <a class="pc-back" href="/">기존 보안 화면 열기 ↗</a>
+    </div>
+  </header>
+  <main class="pc-main">
+    <section class="pc-hero">
+      <div>
+        <p class="pc-eyebrow">내 PC에서, 필요한 때에</p>
+        <h1>지금 상태를 읽고<br>변화를 비교하세요.</h1>
+      </div>
+      <p class="pc-hero-note">버튼을 누를 때 조회합니다. 자동 확인은 직접 켤 때만 10초마다 합니다.<br>조회한 값과 확인하지 못한 항목을 구분합니다.</p>
+    </section>
+    <ol class="pc-steps">
+      <li><span class="pc-step-no">01</span><strong>PC 자원 상태</strong><span>CPU · 메모리 · 디스크</span></li>
+      <li><span class="pc-step-no">02</span><strong>연결·Windows 기록</strong><span>네트워크 · 방화벽 · 오류 건수</span></li>
+      <li><span class="pc-step-no">03</span><strong>사건 근거·조치</strong><span><a href="/">기존 보안 화면</a>에서 확인</span></li>
+    </ol>
+    <div id="pc-app" class="pc-app">
+      <p class="pc-muted">화면을 준비하는 중입니다. 계속 이 문구만 보이면 서버가 켜져 있는지 확인하세요.</p>
+    </div>
+  </main>
+</body>
+</html>
