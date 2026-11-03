@@ -889,7 +889,8 @@ function livePcPanel() {
   const label = look(node('label'), { marginLeft: '0.75rem', cursor: 'pointer' });
   label.append(auto, node('span', ' 10초마다 확인 (앱 탭이 보이는 동안)'));
   const line = node('p', undefined, 'muted');
-  const cards = look(node('div', undefined, 'dashboard-cards'), { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(13rem, 1fr))', gap: '0.75rem' });
+  // 한 칸의 최소 너비를 「13rem」과 「전체의 1/3」 중 큰 값으로 두어 넓으면 3칸×2줄, 좁으면 2칸·1칸이 됩니다(6칸이라 한 칸만 남지 않음).
+  const cards = look(node('div', undefined, 'dashboard-cards'), { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, max(13rem, calc((100% - 1.5rem) / 3))), 1fr))', gap: '0.75rem' });
 
   function draw() {
     const { pc, conn } = live;
