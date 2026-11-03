@@ -380,6 +380,12 @@ function failureBox(key, error) {
   return box;
 }
 
+// 알림 한 건이 연결·응답 확인 실패에서 나온 것인지 구분합니다. 어느 쪽이든 이 앱은 위험 판정으로 바꾸지 않습니다.
+function alertKind(item) {
+  const code = typeof item?.code === 'string' ? item.code : '';
+  return /NOT_CONNECTED|TIMEOUT|UNVERIFIED|MISMATCH|NETWORK|UNAVAILABLE/u.test(code) ? 'connection' : 'other';
+}
+
 function statusSection(key, title, resource, renderOk) {
   const section = node('section', undefined, `status-resource status-${key}`);
   section.dataset.resource = key;
@@ -1016,12 +1022,21 @@ function renderStatus(input) {
   if (!Array.isArray(notifications) || notifications.length === 0) {
     alerts.append(node('p', '주의할 알림이 없습니다.', 'state state-empty'));
   } else {
-    const list = node('ul');
-    for (const item of notifications) {
-      const li = node('li', `자료: ${resourceName(item?.resource)} · 코드: ${safeCode(item?.code)} · ${safeText(item?.message, '메시지 없음')}`);
+    const kinds = notifications.map((item) => alertKind(item));
+    const connectionCount = kinds.filter((k) => k === 'connection').length;
+    // 연결 실패 알림은 위험 판정이 아닙니다. 위험 여부는 "없음"이 아니라 "확인 불가"로 말합니다.
+    alerts.append(look(node('p', connectionCount === notifications.length
+      ? `알림 ${notifications.length}건은 모두 연결 실패 알림이며 위험 판정이 아닙니다. 위험 여부는 확인 불가입니다(위험 알림은 시스템 연결이 있어야 표시됩니다).`
+      : `알림 ${notifications.length}건 중 연결 실패 알림 ${connectionCount}건입니다. 연결 실패 알림은 위험 판정이 아니며, 나머지 항목의 위험 등급은 이 화면에서 확인할 수 없습니다.`, 'muted'), { lineHeight: '1.6' }));
+    const list = look(node('ul'), { padding: '0' });
+    notifications.forEach((item, index) => {
+      const connection = kinds[index] === 'connection';
+      const li = look(node('li', undefined, 'status-notification-item'), { listStyle: 'none', margin: '0.5rem 0', padding: '0.6rem 0.9rem', border: '1px solid rgba(124, 58, 237, 0.25)', borderLeft: `6px solid ${connection ? '#d97706' : '#6b7280'}`, borderRadius: '8px' });
+      const badge = look(node('strong', connection ? '연결 실패 알림 · 위험 판정 아님' : '서버가 알린 항목 · 위험 등급 확인 불가'), { display: 'inline-block', padding: '0.1rem 0.6rem', borderRadius: '999px', background: connection ? '#fef3c7' : '#e5e7eb', color: connection ? '#78350f' : '#1f2937', fontSize: '0.9rem' });
+      li.append(badge, look(node('p', `자료: ${resourceName(item?.resource)} · 코드: ${safeCode(item?.code)} · ${safeText(item?.message, '메시지 없음')}`), { margin: '0.4rem 0 0', lineHeight: '1.5' }));
       li.dataset.resource = typeof item?.resource === 'string' ? item.resource : 'unknown';
       list.append(li);
-    }
+    });
     alerts.append(list);
   }
   root.append(alerts);
