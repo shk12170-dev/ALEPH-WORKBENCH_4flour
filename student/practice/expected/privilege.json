@@ -1,0 +1,167 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "privilege",
+  "decisions": [
+    {
+      "alertId": "pv-01",
+      "action": "block",
+      "confidence": 0.89,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078]: 권한 상승 사건 1개(관리자 그룹 추가), 정황 1개(원격·처음 보는 주소), 수준 12"
+    },
+    {
+      "alertId": "pv-02",
+      "action": "block",
+      "confidence": 0.89,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068]: 권한 상승 사건 1개(관리자 명령 실행), 정황 1개(추가 직후 명령 실행), 수준 12"
+    },
+    {
+      "alertId": "pv-03",
+      "action": "block",
+      "confidence": 0.91,
+      "reason": "업무 시간 밖·낯선 주소의 권한 사용 [off-hours-privilege-use, T1078]: 권한 상승 사건 1개(관리자 명령 실행), 정황 2개(원격·처음 보는 주소·수업 시간 밖), 수준 11"
+    },
+    {
+      "alertId": "pv-04",
+      "action": "block",
+      "confidence": 0.92,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078]: 권한 상승 사건 2개(관리자 그룹 추가·관리자 명령 실행), 정황 1개(추가 직후 명령 실행), 수준 12"
+    },
+    {
+      "alertId": "pv-05",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078]: 권한 상승 사건 2개(관리자 그룹 추가·여러 계정 연속 추가), 정황 0개(없음), 수준 10"
+    },
+    {
+      "alertId": "pv-06",
+      "action": "block",
+      "confidence": 0.89,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068]: 권한 상승 사건 1개(세션 권한 상승), 정황 1개(원격·처음 보는 주소), 수준 12"
+    },
+    {
+      "alertId": "pv-07",
+      "action": "block",
+      "confidence": 0.91,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078]: 권한 상승 사건 1개(관리자 그룹 추가), 정황 2개(수업 시간 밖·추가 직후 명령 실행), 수준 11"
+    },
+    {
+      "alertId": "pv-08",
+      "action": "block",
+      "confidence": 0.89,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068]: 권한 상승 사건 2개(관리자 명령 실행·다른 계정의 권한 사용), 정황 0개(없음), 수준 12"
+    },
+    {
+      "alertId": "pv-09",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078]: 권한 상승 사건 2개(관리자 그룹 추가·그룹 탈퇴 직후 재가입), 정황 0개(없음), 수준 10"
+    },
+    {
+      "alertId": "pv-10",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068] 의심 신호뿐(변경·실행 근거 부족)이라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "pv-11",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078] 의심 신호뿐(변경·실행 근거 부족)이라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 7"
+    },
+    {
+      "alertId": "pv-12",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068] 근거가 하나뿐이라 알림만 남김: 권한 상승 사건 1개(관리자 명령 실행), 정황 0개(없음), 수준 5"
+    },
+    {
+      "alertId": "pv-13",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 근거도 확인되지 않은 경보라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "pv-14",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068] 의심 신호뿐(변경·실행 근거 부족)이라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 8"
+    },
+    {
+      "alertId": "pv-15",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078] 의심 신호뿐(변경·실행 근거 부족)이라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "pv-16",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 관리자 명령 실행·권한 상승 [unfamiliar-admin-command, T1068] 의심 신호뿐(변경·실행 근거 부족)이라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 7"
+    },
+    {
+      "alertId": "pv-17",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "평범한 계정의 관리자 그룹 추가 [admin-group-addition, T1078] 의심 신호뿐(변경·실행 근거 부족)이라 알림만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 5"
+    },
+    {
+      "alertId": "pv-18",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "pv-19",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "pv-20",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "pv-21",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "pv-22",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "pv-23",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "pv-24",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "pv-25",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "pv-26",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 admin-group-addition·unfamiliar-admin-command·off-hours-privilege-use 어느 패턴과도 맞지 않아 기록만 남김: 권한 상승 사건 0개(없음), 정황 0개(없음), 수준 2"
+    }
+  ],
+  "counts": {
+    "block": 9,
+    "alert": 8,
+    "record": 9
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "known-cve",
+  "decisions": [
+    {
+      "alertId": "kc-01",
+      "action": "block",
+      "confidence": 0.91,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190]: 머리글 인자 1곳, 반복 0번, 수준 13"
+    },
+    {
+      "alertId": "kc-02",
+      "action": "block",
+      "confidence": 0.91,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190]: 주소 인자 1곳, 반복 0번, 수준 12"
+    },
+    {
+      "alertId": "kc-03",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "같은 주소의 원격 조회 구문 반복 시도 [repeated-lookup-probe, T1190]: 주소 인자 1곳, 반복 6번, 수준 12"
+    },
+    {
+      "alertId": "kc-04",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "같은 주소의 원격 조회 구문 반복 시도 [repeated-lookup-probe, T1190]: 머리글 인자 1곳, 반복 4번, 수준 13"
+    },
+    {
+      "alertId": "kc-05",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression+known-vuln-scanner-trace, T1190]: 주소 인자 1곳, 반복 0번, 수준 12, 점검 도구 흔적"
+    },
+    {
+      "alertId": "kc-06",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "같은 주소의 원격 조회 구문 반복 시도 [repeated-lookup-probe, T1190]: 주소 인자 1곳, 반복 8번, 수준 11"
+    },
+    {
+      "alertId": "kc-07",
+      "action": "block",
+      "confidence": 0.91,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190]: 머리글 인자 1곳, 반복 0번, 수준 12"
+    },
+    {
+      "alertId": "kc-08",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190]: 주소·머리글 인자 2곳, 반복 0번, 수준 10"
+    },
+    {
+      "alertId": "kc-09",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "kc-10",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 5"
+    },
+    {
+      "alertId": "kc-11",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "알려진 취약점 점검 도구의 흔적 [known-vuln-scanner-trace, T1595.002] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 7"
+    },
+    {
+      "alertId": "kc-12",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "kc-13",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "알려진 취약점 점검 도구의 흔적 [known-vuln-scanner-trace, T1595.002] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 5"
+    },
+    {
+      "alertId": "kc-14",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 7"
+    },
+    {
+      "alertId": "kc-15",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "kc-16",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "머리글·주소 인자 안의 원격 조회 구문(jndi) [jndi-lookup-expression, T1190] 의심 신호뿐(완전한 구문 없음)이라 알림만 남김: 조회 구문 없음, 반복 2번, 수준 8"
+    },
+    {
+      "alertId": "kc-17",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "kc-18",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "kc-19",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "kc-20",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 2"
+    },
+    {
+      "alertId": "kc-21",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "kc-22",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 2"
+    },
+    {
+      "alertId": "kc-23",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "kc-24",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 jndi-lookup-expression·repeated-lookup-probe·known-vuln-scanner-trace 어느 패턴과도 맞지 않아 기록만 남김: 조회 구문 없음, 반복 0번, 수준 3"
+    }
+  ],
+  "counts": {
+    "block": 8,
+    "alert": 8,
+    "record": 8
+  }
+}

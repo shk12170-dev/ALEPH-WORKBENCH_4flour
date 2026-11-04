@@ -968,7 +968,7 @@ function coreFeatureStrip(targets) {
   const go2 = actionButton('내 PC 상태로 이동');
   go2.addEventListener('click', () => jumpTo(targets.pc));
   item2.append(go2);
-  const item3 = node('li', '위험 알림 · 아직 안 됨 · 시스템 연결 설정이 있어야 합니다. 지금은 연결 실패 알림만 보입니다. ');
+  const item3 = node('li', '위험 알림 · 실제 탐지는 아직 안 됨 · 시스템 연결 설정이 있어야 합니다. 지금은 연결 실패 알림만 보입니다. 다만 공식 연습 경보로 판단 방식은 시연할 수 있습니다(실제 탐지가 아님). ');
   const go3 = actionButton('알림 목록으로 이동');
   go3.addEventListener('click', () => jumpTo(targets.alerts));
   item3.append(go3);
@@ -980,7 +980,10 @@ function coreFeatureStrip(targets) {
   // 앱이 스스로를 사례별로 대조하는 점검 기록 화면(/checks)으로 이동합니다.
   const checksPage = look(node('a', '점검 기록 열기 ↗', 'student-checks-page-link'), { display: 'inline-block', margin: '0.25rem 0 0.5rem 1rem', fontWeight: '600' });
   checksPage.href = '/checks';
-  section.append(pcPage, checksPage);
+  // 공식 연습 경보로 위험 판단을 시연하는 화면(/practice). 실제 탐지가 아니며 [예시 화면 · 설명용 값]입니다.
+  const practicePage = look(node('a', '연습 경보 시연 열기 ↗', 'student-practice-page-link'), { display: 'inline-block', margin: '0.25rem 0 0.5rem 1rem', fontWeight: '600' });
+  practicePage.href = '/practice';
+  section.append(pcPage, checksPage, practicePage);
   section.append(node('p', `상태 표시는 점검표(docs/FEATURE_CHECKLIST.md) 기준입니다. 아래 값은 ${VALUE_MEASURED}이고, 안내 화면의 예시는 ${VALUE_EXAMPLE}입니다.`, 'muted'));
   return look(section, { marginBottom: '1rem', padding: '0.75rem 1rem', border: '2px solid rgba(124, 58, 237, 0.5)', borderRadius: '8px' });
 }

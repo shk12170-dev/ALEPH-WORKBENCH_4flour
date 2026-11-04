@@ -139,11 +139,14 @@ flowchart LR
 
 | 구분 | 내용 |
 |---|---|
-| **학생이 작성** | `student/extension.mjs`의 `renderIdentity`, `renderDecision`, `renderEvents`(상세 영역의 미지원 조치 안내 포함), `renderStatus`(도움정보 복사 버튼 포함), `renderAiConnection`, `renderExplanation`, `renderAction`, `renderVulnerabilities`, `createStudentView`. 이 문서. 완성하기 단계: `src/pc-status/`(PC 조회, 자체 점검), `student/pc.*`, `student/checks.*`, `docs/QUICKSTART_ONE_PAGE.md`, `docs/FEATURE_CHECKLIST.md`, `docs/DEMO_AND_LIMITS.md` |
+| **학생이 작성** | `student/extension.mjs`의 `renderIdentity`, `renderDecision`, `renderEvents`(상세 영역의 미지원 조치 안내 포함), `renderStatus`(도움정보 복사 버튼 포함), `renderAiConnection`, `renderExplanation`, `renderAction`, `renderVulnerabilities`, `createStudentView`. 이 문서. 완성하기 단계: `src/pc-status/`(PC 조회, 자체 점검), `student/pc.*`, `student/checks.*`, `student/practice.*`, `src/practice-alerts/`, `student/practice/`(vault 보너스 복사), `test/`, `docs/QUICKSTART_ONE_PAGE.md`, `docs/FEATURE_CHECKLIST.md`, `docs/DEMO_AND_LIMITS.md` |
 | **제공(수정하지 않음)** | `src/`의 나머지(엔진·AI·연결·조치·OSV), `public/` 전체, `tools/`, `vendor/`, `student/engine-adapter.mjs`, `docs/`의 제공 문서 |
-| **제공이지만 학생이 고침** | `src/server.mjs`: 학생 API(`/api/pc-status`, `/api/pc-connection`, `/api/checks`)와 화면 경로(`/pc`, `/checks`)만 더함. 스타터를 업데이트하면 덮어써질 수 있음. `README.md`: 안내 한 줄과 「학생 실행 설명서」 |
+| **제공이지만 학생이 고침** | `src/server.mjs`: 학생 API(`/api/pc-status`, `/api/pc-connection`, `/api/checks`, `/api/practice-alerts`)와 화면 경로(`/pc`, `/checks`, `/practice`)만 더함. 스타터를 업데이트하면 덮어써질 수 있음. `README.md`: 안내 한 줄과 「학생 실행 설명서」 |
 | **경계** | 제공 화면이 서버에서 값을 가져와 검증하고 학생 함수에 전달합니다. 학생 함수는 값을 글자로 표시하기만 하며, 서버를 직접 호출하거나 조치 요청을 보내지 않습니다. 확인 번호·토큰은 학생 코드에 전달되지 않습니다 |
 | **엔진 출처** | 접근 제어·XDR 연결은 제공 엔진 코드(`src/engine/`)이며 학생이 만든 것이 아닙니다 |
+| **SDP 관련 파일(제공)** | `docs/SDP_HOST_CONNECTION.md`, `docs/SDP_HOST_OBSERVATION.md`, `src/engine/sdp-host.mjs`, `src/engine/sdp-host-config.mjs`, `src/actions/sdp-action-engine.mjs`, `src/connection/native-context.mjs`, `src/connection/native-login.mjs`, `src/engine.mjs`, `student/engine-adapter.mjs`, `tools/prepare-native-host.ps1`, `tools/native-host-registry.ps1`. 모두 시작 틀이며 `.on-starter-manifest.json`에 있고 내용을 고치지 않았습니다. 13~22단계에서 학생이 바꾼 파일은 `README.md`, `student/extension.mjs`와 문서뿐입니다 |
+| **XDR 판단 모듈(학생 작업을 복사)** | `student/practice/<모듈>/decide.mjs` 6개는 방어전 1~12단계 저장소(`choi-bujang-secret-vault`)의 보너스 xdr-01~06을 내용 그대로 복사한 것입니다. 연습 경보(`fixtures`)는 공식 제공이고 실제 로그가 아닙니다. 「SDR」이라는 이름의 파일은 두 저장소에 없습니다 |
+| **연습 경보 시연(학생, 11일차)** | `src/practice-alerts/service.mjs`, `student/practice.*`, `GET /api/practice-alerts`, `/practice`. 읽고 계산만 하며 조치는 실행하지 않습니다. [예시 화면 · 설명용 값] |
 
 | 함수 | 확인 방법 |
 |---|---|

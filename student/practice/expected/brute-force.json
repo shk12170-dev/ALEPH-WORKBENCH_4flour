@@ -1,0 +1,179 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "brute-force",
+  "decisions": [
+    {
+      "alertId": "bf-01",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 48건 / 2분, 수준 12"
+    },
+    {
+      "alertId": "bf-02",
+      "action": "block",
+      "confidence": 0.9,
+      "reason": "여러 계정에 같은 비밀번호를 대입 [multi-account-same-password, T1110.003]: 계정 8개에 같은 시도, 수준 12"
+    },
+    {
+      "alertId": "bf-03",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 36건 / 3분, 수준 10"
+    },
+    {
+      "alertId": "bf-04",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 52건 / 2분, 수준 12"
+    },
+    {
+      "alertId": "bf-05",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "여러 계정에 같은 비밀번호를 대입 [multi-account-same-password, T1110.003]: 계정 20개에 같은 시도, 수준 11"
+    },
+    {
+      "alertId": "bf-06",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 61건 / 1분, 수준 12"
+    },
+    {
+      "alertId": "bf-07",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 40건, 수준 10"
+    },
+    {
+      "alertId": "bf-08",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 70건, 수준 12"
+    },
+    {
+      "alertId": "bf-09",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "여러 계정에 같은 비밀번호를 대입 [multi-account-same-password, T1110.003]: 계정 15개에 같은 시도, 수준 11"
+    },
+    {
+      "alertId": "bf-10",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 90건, 수준 12"
+    },
+    {
+      "alertId": "bf-11",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 4건 / 뒤에 성공, 수준 6"
+    },
+    {
+      "alertId": "bf-12",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 6건 / 5분 / 뒤에 성공, 수준 7"
+    },
+    {
+      "alertId": "bf-13",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 3건, 수준 5"
+    },
+    {
+      "alertId": "bf-14",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 5건 / 10분, 수준 6"
+    },
+    {
+      "alertId": "bf-15",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 4건, 수준 7"
+    },
+    {
+      "alertId": "bf-16",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 3건, 수준 5"
+    },
+    {
+      "alertId": "bf-17",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 4건 / 뒤에 성공, 수준 6"
+    },
+    {
+      "alertId": "bf-18",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 8건, 수준 8"
+    },
+    {
+      "alertId": "bf-19",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "같은 주소의 짧은 시간 로그인 실패 연속 [same-source-failure-burst, T1110.001]: 실패 3건, 수준 6"
+    },
+    {
+      "alertId": "bf-20",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 3)"
+    },
+    {
+      "alertId": "bf-21",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 3)"
+    },
+    {
+      "alertId": "bf-22",
+      "action": "record",
+      "confidence": 0.15,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (실패 1건 / 뒤에 성공, 수준 3)"
+    },
+    {
+      "alertId": "bf-23",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 3)"
+    },
+    {
+      "alertId": "bf-24",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 2)"
+    },
+    {
+      "alertId": "bf-25",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 3)"
+    },
+    {
+      "alertId": "bf-26",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 3)"
+    },
+    {
+      "alertId": "bf-27",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 2)"
+    },
+    {
+      "alertId": "bf-28",
+      "action": "record",
+      "confidence": 0,
+      "reason": "패턴과 뚜렷하게 맞지 않아 기록만 남김 (변형 대입 실패 0건, 수준 3)"
+    }
+  ],
+  "counts": {
+    "block": 10,
+    "alert": 9,
+    "record": 9
+  }
+}

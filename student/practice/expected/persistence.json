@@ -1,0 +1,155 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "persistence",
+  "decisions": [
+    {
+      "alertId": "ps-01",
+      "action": "block",
+      "confidence": 0.92,
+      "reason": "서명 없는 새 서비스 등록·교체 [unsigned-new-service, T1543.003]: 수단 1개, 의심 요인 3개(서명 없음·임시 폴더 실행 파일·평소 목록에 없음), 수준 12"
+    },
+    {
+      "alertId": "ps-02",
+      "action": "block",
+      "confidence": 0.92,
+      "reason": "낯선 예약 작업 생성 [unfamiliar-scheduled-task, T1053.005]: 수단 1개, 의심 요인 3개(임시 폴더 실행 파일·평소 목록에 없음·수업 시간 밖 실행), 수준 12"
+    },
+    {
+      "alertId": "ps-03",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "시작 폴더·시작 프로그램 변경 [startup-folder-change, T1547.001]: 수단 1개, 의심 요인 2개(평소 목록에 없음·시작 폴더 경로의 새 파일), 수준 11"
+    },
+    {
+      "alertId": "ps-04",
+      "action": "block",
+      "confidence": 0.89,
+      "reason": "서명 없는 새 서비스 등록·교체 [unsigned-new-service, T1543.003]: 수단 1개, 의심 요인 2개(서명 없음·원격 주소 연속 등록), 수준 12"
+    },
+    {
+      "alertId": "ps-05",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "낯선 예약 작업 생성 [unfamiliar-scheduled-task, T1053.005]: 수단 1개, 의심 요인 2개(임시 폴더 실행 파일·임의 문자열 이름), 수준 10"
+    },
+    {
+      "alertId": "ps-06",
+      "action": "block",
+      "confidence": 0.92,
+      "reason": "서명 없는 새 서비스 등록·교체 [unsigned-new-service, T1543.003]: 수단 1개, 의심 요인 3개(서명 없음·임시 폴더 실행 파일·실행 파일 교체), 수준 12"
+    },
+    {
+      "alertId": "ps-07",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "낯선 예약 작업 생성 [unfamiliar-scheduled-task, T1053.005]: 수단 2개, 의심 요인 2개(임시 폴더 실행 파일·두 수단이 같은 파일 지정), 수준 11"
+    },
+    {
+      "alertId": "ps-08",
+      "action": "block",
+      "confidence": 0.92,
+      "reason": "서명 없는 새 서비스 등록·교체 [unsigned-new-service, T1543.003]: 수단 1개, 의심 요인 3개(임시 폴더 실행 파일·평소 목록에 없음·다시 켜도 남도록 등록), 수준 12"
+    },
+    {
+      "alertId": "ps-09",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "낯선 예약 작업 생성 [unfamiliar-scheduled-task, T1053.005] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "ps-10",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "시작 폴더·시작 프로그램 변경 [startup-folder-change, T1547.001] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 7"
+    },
+    {
+      "alertId": "ps-11",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "서명 없는 새 서비스 등록·교체 [unsigned-new-service, T1543.003] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 5"
+    },
+    {
+      "alertId": "ps-12",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "낯선 예약 작업 생성 [unfamiliar-scheduled-task, T1053.005] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "ps-13",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "시작 폴더·시작 프로그램 변경 [startup-folder-change, T1547.001] 단서가 하나뿐이라 알림만 남김: 수단 0개, 의심 요인 1개(임시 폴더 실행 파일), 수준 8"
+    },
+    {
+      "alertId": "ps-14",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "시작 폴더·시작 프로그램 변경 [startup-folder-change, T1547.001] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "ps-15",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "낯선 예약 작업 생성 [unfamiliar-scheduled-task, T1053.005] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 7"
+    },
+    {
+      "alertId": "ps-16",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "서명 없는 새 서비스 등록·교체 [unsigned-new-service, T1543.003] 단서가 하나뿐이라 알림만 남김: 수단 1개, 의심 요인 0개(없음), 수준 5"
+    },
+    {
+      "alertId": "ps-17",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 0개, 의심 요인 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ps-18",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 0개, 의심 요인 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "ps-19",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 1개, 의심 요인 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ps-20",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 1개, 의심 요인 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "ps-21",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 0개, 의심 요인 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ps-22",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 0개, 의심 요인 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ps-23",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 1개, 의심 요인 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "ps-24",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 unsigned-new-service·unfamiliar-scheduled-task·startup-folder-change 어느 패턴과도 맞지 않아 기록만 남김: 수단 0개, 의심 요인 0개(없음), 수준 3"
+    }
+  ],
+  "counts": {
+    "block": 8,
+    "alert": 8,
+    "record": 8
+  }
+}

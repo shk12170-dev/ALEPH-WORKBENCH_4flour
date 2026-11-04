@@ -1,0 +1,167 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "web-injection",
+  "decisions": [
+    {
+      "alertId": "wi-01",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection, T1190]: 반복 12번, 수준 12"
+    },
+    {
+      "alertId": "wi-02",
+      "action": "block",
+      "confidence": 0.9,
+      "reason": "요청 인자 안의 스크립트 태그 [script-injection, T1190]: 반복 9번, 수준 12"
+    },
+    {
+      "alertId": "wi-03",
+      "action": "block",
+      "confidence": 0.9,
+      "reason": "경로 거슬러 올라가기(../) 반복 [path-traversal, T1190]: 반복 8번, 수준 11"
+    },
+    {
+      "alertId": "wi-04",
+      "action": "block",
+      "confidence": 0.96,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection, T1190]: 반복 20번, 수준 12"
+    },
+    {
+      "alertId": "wi-05",
+      "action": "block",
+      "confidence": 0.97,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection+script-injection, T1190]: 반복 15번, 수준 10"
+    },
+    {
+      "alertId": "wi-06",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "요청 인자 안의 명령 구분자 [command-injection, T1190]: 반복 11번, 수준 11"
+    },
+    {
+      "alertId": "wi-07",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "경로 거슬러 올라가기(../) 반복 [path-traversal, T1190]: 반복 14번, 수준 12"
+    },
+    {
+      "alertId": "wi-08",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection, T1190]: 반복 10번, 수준 10"
+    },
+    {
+      "alertId": "wi-09",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection, T1190] 의심 신호뿐(구조·반복 근거 부족)이라 알림만 남김: 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "wi-10",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection, T1190] 의심 신호뿐(구조·반복 근거 부족)이라 알림만 남김: 반복 1번, 수준 5"
+    },
+    {
+      "alertId": "wi-11",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "요청 인자 안의 스크립트 태그 [script-injection, T1190] 의심 신호뿐(구조·반복 근거 부족)이라 알림만 남김: 반복 1번, 수준 7"
+    },
+    {
+      "alertId": "wi-12",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "경로 거슬러 올라가기(../) 반복 [path-traversal, T1190] 의심 신호뿐(구조·반복 근거 부족)이라 알림만 남김: 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "wi-13",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 구조도 확인되지 않은 웹 경보라 알림만 남김: 반복 1번, 수준 5"
+    },
+    {
+      "alertId": "wi-14",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "요청 인자 안의 SQL 구문 [sql-injection, T1190] 의심 신호뿐(구조·반복 근거 부족)이라 알림만 남김: 반복 1번, 수준 7"
+    },
+    {
+      "alertId": "wi-15",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 구조도 확인되지 않은 웹 경보라 알림만 남김: 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "wi-16",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 구조도 확인되지 않은 웹 경보라 알림만 남김: 반복 1번, 수준 8"
+    },
+    {
+      "alertId": "wi-17",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "요청 인자 안의 명령 구분자 [command-injection, T1190] 의심 신호뿐(구조·반복 근거 부족)이라 알림만 남김: 반복 1번, 수준 6"
+    },
+    {
+      "alertId": "wi-18",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "wi-19",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "wi-20",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 2"
+    },
+    {
+      "alertId": "wi-21",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "wi-22",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "wi-23",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 2"
+    },
+    {
+      "alertId": "wi-24",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "wi-25",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 3"
+    },
+    {
+      "alertId": "wi-26",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 sql-injection·script-injection·path-traversal·command-injection 어느 패턴과도 맞지 않아 기록만 남김: 반복 0번, 수준 2"
+    }
+  ],
+  "counts": {
+    "block": 8,
+    "alert": 9,
+    "record": 9
+  }
+}

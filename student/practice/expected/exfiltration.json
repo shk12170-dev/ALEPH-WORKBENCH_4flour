@@ -1,0 +1,191 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "exfiltration",
+  "decisions": [
+    {
+      "alertId": "ex-01",
+      "action": "block",
+      "confidence": 0.9,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048]: 전송량 240MB·파일 200건(대량), 정황 1개(처음 보는 목적지), 수준 12"
+    },
+    {
+      "alertId": "ex-02",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "업무 시간 밖 압축 파일 반출 [off-hours-archive-exfiltration, T1048]: 전송량 180MB·파일 1건(대량), 정황 3개(처음 보는 목적지·수업 시간 밖·압축 파일), 수준 12"
+    },
+    {
+      "alertId": "ex-03",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "명령 통로로 반복된 대용량 전송 [repeated-c2-channel-transfer, T1041]: 전송량 90MB·파일 0건(대량), 정황 1개(반복 전송), 수준 11"
+    },
+    {
+      "alertId": "ex-04",
+      "action": "block",
+      "confidence": 0.92,
+      "reason": "명령 통로로 반복된 대용량 전송 [repeated-c2-channel-transfer, T1041]: 전송량 120MB·파일 60건(대량), 정황 2개(평소 쓰지 않던 포트·반복 전송), 수준 12"
+    },
+    {
+      "alertId": "ex-05",
+      "action": "block",
+      "confidence": 0.88,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048]: 전송량 70MB·파일 140건(대량), 정황 1개(처음 보는 목적지), 수준 10"
+    },
+    {
+      "alertId": "ex-06",
+      "action": "block",
+      "confidence": 0.93,
+      "reason": "명령 통로로 반복된 대용량 전송 [repeated-c2-channel-transfer, T1041]: 전송량 210MB·파일 0건(대량), 정황 2개(수업 시간 밖·반복 전송), 수준 12"
+    },
+    {
+      "alertId": "ex-07",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "명령 통로로 반복된 대용량 전송 [repeated-c2-channel-transfer, T1041]: 전송량 150MB·파일 3건(대량), 정황 3개(처음 보는 목적지·압축 파일·반복 전송), 수준 11"
+    },
+    {
+      "alertId": "ex-08",
+      "action": "block",
+      "confidence": 0.9,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048]: 전송량 320MB·파일 400건(대량), 정황 1개(자료실 전체 복사), 수준 12"
+    },
+    {
+      "alertId": "ex-09",
+      "action": "block",
+      "confidence": 0.94,
+      "reason": "명령 통로로 반복된 대용량 전송 [repeated-c2-channel-transfer, T1041]: 전송량 80MB·파일 0건(대량), 정황 3개(처음 보는 목적지·명령 통로·반복 전송), 수준 10"
+    },
+    {
+      "alertId": "ex-10",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048]: 전송량 110MB·파일 2건(대량), 정황 3개(처음 보는 목적지·압축 파일·여러 목적지), 수준 12"
+    },
+    {
+      "alertId": "ex-11",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 8MB·파일 1건(중간), 정황 1개(처음 보는 목적지), 수준 6"
+    },
+    {
+      "alertId": "ex-12",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 12MB·파일 4건(중간), 정황 0개(없음), 수준 7"
+    },
+    {
+      "alertId": "ex-13",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 2MB·파일 1건(소량), 정황 1개(압축 파일), 수준 5"
+    },
+    {
+      "alertId": "ex-14",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 0MB·파일 2건(소량), 정황 1개(처음 보는 목적지), 수준 6"
+    },
+    {
+      "alertId": "ex-15",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 의심 신호뿐(전송량·정황 근거 부족)이라 알림만 남김: 전송량 3MB·파일 1건(소량), 정황 0개(없음), 수준 8"
+    },
+    {
+      "alertId": "ex-16",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 15MB·파일 1건(중간), 정황 0개(없음), 수준 6"
+    },
+    {
+      "alertId": "ex-17",
+      "action": "alert",
+      "confidence": 0.55,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 6MB·파일 12건(중간), 정황 0개(없음), 수준 7"
+    },
+    {
+      "alertId": "ex-18",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 0MB·파일 1건(소량), 정황 1개(처음 보는 목적지), 수준 5"
+    },
+    {
+      "alertId": "ex-19",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "명령 통로로 반복된 대용량 전송 [repeated-c2-channel-transfer, T1041] 대량 전송 근거가 부족해 알림만 남김: 전송량 0MB·파일 0건(소량), 정황 2개(명령 통로·반복 전송), 수준 6"
+    },
+    {
+      "alertId": "ex-20",
+      "action": "alert",
+      "confidence": 0.6,
+      "reason": "처음 보는 목적지로 대용량 전송 [large-transfer-new-destination, T1048] 대량 전송 근거가 부족해 알림만 남김: 전송량 5MB·파일 2건(중간), 정황 1개(압축 파일), 수준 7"
+    },
+    {
+      "alertId": "ex-21",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 1건(소량), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ex-22",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 1건(소량), 정황 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "ex-23",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 3건(소량), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ex-24",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 1건(소량), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ex-25",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 0건(소량), 정황 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "ex-26",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 1건(소량), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ex-27",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 1건(소량), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ex-28",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 0건(소량), 정황 0개(없음), 수준 2"
+    },
+    {
+      "alertId": "ex-29",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 0건(소량), 정황 0개(없음), 수준 3"
+    },
+    {
+      "alertId": "ex-30",
+      "action": "record",
+      "confidence": 0.1,
+      "reason": "패턴 large-transfer-new-destination·off-hours-archive-exfiltration·repeated-c2-channel-transfer 어느 패턴과도 맞지 않아 기록만 남김: 전송량 0MB·파일 1건(소량), 정황 0개(없음), 수준 3"
+    }
+  ],
+  "counts": {
+    "block": 10,
+    "alert": 10,
+    "record": 10
+  }
+}
