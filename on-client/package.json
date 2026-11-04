@@ -1,0 +1,15 @@
+{
+  "name": "alekov-client-starter",
+  "version": "0.2.21",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "demo": "node src/server.mjs --demo",
+    "check": "node --check student/extension.mjs",
+    "package-app": "node tools/package-app.mjs"
+  },
+  "engines": {
+    "node": "24.19.0"
+  }
+}
